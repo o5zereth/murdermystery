@@ -53,12 +53,16 @@
     <Compile Include="Config.cs" />
     <Compile Include="Enums\MMRole.cs" />
     <Compile Include="EventHandlers.cs" />
+    <Compile Include="GamemodeStatus.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\MMPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
