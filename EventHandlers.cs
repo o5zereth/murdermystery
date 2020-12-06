@@ -5,8 +5,8 @@ namespace MurderMystery
 {
     public class EventHandlers
     {
-        private GamemodeStatus gamemodeStatus => Plugin.GamemodeStatus;
         private readonly Plugin plugin;
+        private GamemodeStatus gamemodeStatus => Plugin.GamemodeStatus;
         internal EventHandlers(Plugin plugin) => this.plugin = plugin;
 
         internal void EnablePrimary(bool enable = true)

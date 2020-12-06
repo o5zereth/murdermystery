@@ -22,6 +22,7 @@ namespace MurderMystery.Utils
         public static IEnumerable<MMPlayer> Innocents => List.Where(ply => ply.Role == MMRole.Innocent);
         public static IEnumerable<MMPlayer> Murderers => List.Where(ply => ply.Role == MMRole.Murderer);
         public static IEnumerable<MMPlayer> Detectives => List.Where(ply => ply.Role == MMRole.Detective);
+        public static IEnumerable<MMPlayer> Alive => List.Where(ply => ply.Role != MMRole.Spectator && ply.Role != MMRole.None);
 
         internal static void Add(JoinedEventArgs ev)
         {
