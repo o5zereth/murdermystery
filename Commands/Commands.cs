@@ -3,8 +3,12 @@ using System;
 
 namespace MurderMystery.Commands
 {
-    public class Commands : ParentCommand
+    [CommandHandler(typeof(RemoteAdminCommandHandler))]
+    [CommandHandler(typeof(GameConsoleCommandHandler))]
+    public class CommandsParent : ParentCommand
     {
+        public CommandsParent() => LoadGeneratedCommands();
+
         public override string Command { get; } = "murdermystery";
 
         public override string[] Aliases { get; } = new string[] { "mm" };
@@ -19,7 +23,7 @@ namespace MurderMystery.Commands
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            response = "You must provide a subcommand. Type mm help for a list of subcommands.";
+            response = "You must provide a subcommand. Type help mm for a list of subcommands.";
             return false;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using Exiled.Permissions.Extensions;
 using System;
 
 namespace MurderMystery.Commands
@@ -13,7 +14,22 @@ namespace MurderMystery.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            throw new NotImplementedException();
+            if (!sender.CheckPermission("mm.enable"))
+            {
+                response = "You don't have permission to execute this command.";
+                return false;
+            }
+            if (!Plugin.GamemodeStatus.Enabled)
+            {
+                Plugin.EventHandlers.EnablePrimary();
+                response = "Gamemode was enabled successfully.";
+                return true;
+            }
+            else
+            {
+                response = "The gamemode is already enabled!";
+                return false;
+            }
         }
     }
 }

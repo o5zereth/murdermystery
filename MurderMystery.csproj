@@ -31,6 +31,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp_publicized">
+      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\publicized_assemblies\Assembly-CSharp_publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="CommandSystem.Core">
+      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\CommandSystem.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Exiled.API, Version=2.1.18.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>packages\EXILED.2.1.18\lib\net472\Exiled.API.dll</HintPath>
     </Reference>
@@ -40,6 +49,9 @@
     <Reference Include="Exiled.Permissions, Version=2.1.18.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>packages\EXILED.2.1.18\lib\net472\Exiled.Permissions.dll</HintPath>
     </Reference>
+    <Reference Include="Mirror">
+      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Mirror.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,8 +60,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Commands.cs" />
+    <Compile Include="Commands\Disable.cs" />
+    <Compile Include="Commands\Enable.cs" />
+    <Compile Include="Commands\Help.cs" />
+    <Compile Include="Commands\TestCMD.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Enums\MMRole.cs" />
     <Compile Include="EventHandlers.cs" />
@@ -61,8 +81,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Commands\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
