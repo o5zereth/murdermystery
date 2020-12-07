@@ -68,8 +68,6 @@
     <Compile Include="Commands\Commands.cs" />
     <Compile Include="Commands\Disable.cs" />
     <Compile Include="Commands\Enable.cs" />
-    <Compile Include="Commands\Help.cs" />
-    <Compile Include="Commands\TestCMD.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Enums\MMRole.cs" />
     <Compile Include="EventHandlers.cs" />
