@@ -5,15 +5,15 @@ namespace MurderMystery.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
-    public class CommandsParent : ParentCommand
+    public class MurderMysteryCmds : ParentCommand
     {
-        public CommandsParent() => LoadGeneratedCommands();
+        public MurderMysteryCmds() => LoadGeneratedCommands();
 
-        public override string Command { get; } = "murdermystery";
+        public override string Command => "murdermystery";
 
-        public override string[] Aliases { get; } = new string[] { "mm" };
+        public override string[] Aliases => new string[] { "mm" };
 
-        public override string Description { get; } = "Parent command for all murder mystery commands.";
+        public override string Description => "Parent command for murder mystery gamemode.";
 
         public override void LoadGeneratedCommands()
         {
@@ -23,7 +23,7 @@ namespace MurderMystery.Commands
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            response = "You must provide a subcommand. Type help mm for a list of subcommands.";
+            response = "Invalid subcommand. Type help mm for a list of subcommands.";
             return false;
         }
     }

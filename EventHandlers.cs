@@ -1,157 +1,154 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
 using MEC;
-using MurderMystery.Enums;
-using MurderMystery.Utils;
 using System.Collections.Generic;
 using Handlers = Exiled.Events.Handlers;
-using CustomPlayerEffects;
+using MurderMystery.Extensions;
+using Interactables.Interobjects.DoorUtils;
+using MurderMystery.Utils;
 
 namespace MurderMystery
 {
     public class EventHandlers
     {
-        private Plugin plugin => Plugin.Singleton;
-        private GamemodeStatus gamemodeStatus => Plugin.GamemodeStatus;
-        internal List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-        internal EventHandlers()
-        {
+        public MurderMystery Plugin => MurderMystery.Singleton;
+        public GamemodeStatus GamemodeStatus => MurderMystery.GamemodeStatus;
+        internal EventHandlers() { }
 
+        internal List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
+
+        private void WaitingForPlayers()
+        {
+            Log.Debug("WaitingForPlayers Primary Event called.", Plugin.Debug);
+            GamemodeStatus.WaitingForPlayers = true;
+            EnableSecondary();
+        }
+        private void RoundStarted()
+        {
+            Log.Debug("RoundStarted Primary Event called.", Plugin.Debug);
+
+            if (Plugin.Config.RequireRoundRestart && !GamemodeStatus.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
+
+            GamemodeStatus.Started = true;
+
+            Coroutines.RunAndAdd(SetupEvent()).RunAndAdd(MMPlayer.SetupPlayers());
+        }
+        private void RoundEnded(RoundEndedEventArgs ev)
+        {
+            Log.Debug("RoundEnded Primary Event called.", Plugin.Debug);
+
+            if (!GamemodeStatus.Started) { return; }
+
+            EnableSecondary(false);
+            Coroutines.KillAll();
+
+            GamemodeStatus.Ended = true;
+        }
+        private void RestartingRound()
+        {
+            Log.Debug("RestartingRound Primary Event called.", Plugin.Debug);
+
+            if (!GamemodeStatus.Started) { return; }
+
+            EnableGamemode(false);
+        }
+
+
+
+
+
+        internal void EnableGamemode(bool enable = true)
+        {
+            Log.Debug($"EnableGamemode Primary Function called. {(enable ? "[Enabling]" : "[Disabling]" )}", Plugin.Debug);
+            if (enable)
+            {
+                if (GamemodeStatus.Enabled) { Log.Debug("EnableGamemode: Gamemode is already enabled.", Plugin.Debug); return; }
+
+                EnablePrimary();
+
+                GamemodeStatus.Enabled = true;
+            }
+            else
+            {
+                if (!GamemodeStatus.Enabled) { Log.Debug("EnableGamemode: Gamemode is already disabled.", Plugin.Debug); return; }
+
+                EnablePrimary(false);
+
+                if (!GamemodeStatus.Ended && GamemodeStatus.SecondaryEventsEnabled) { EnableSecondary(false); Coroutines.KillAll(); }
+
+                GamemodeStatus.Enabled = false;
+                GamemodeStatus.Ended = false;
+                GamemodeStatus.Started = false;
+                GamemodeStatus.WaitingForPlayers = false;
+            }
         }
 
         internal void EnablePrimary(bool enable = true)
         {
+            Log.Debug($"EnablePrimary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", Plugin.Debug);
             if (enable)
             {
-                if (gamemodeStatus.PrimaryHandlersEnabled) { return; }
+                if (GamemodeStatus.PrimaryEventsEnabled) { Log.Debug("EnablePrimary: Primary events are already enabled.", Plugin.Debug); return; }
+
                 Handlers.Server.WaitingForPlayers += WaitingForPlayers;
                 Handlers.Server.RoundStarted += RoundStarted;
                 Handlers.Server.RoundEnded += RoundEnded;
                 Handlers.Server.RestartingRound += RestartingRound;
-                gamemodeStatus.PrimaryHandlersEnabled = true;
-                gamemodeStatus.Enabled = true;
+
+                GamemodeStatus.PrimaryEventsEnabled = true;
             }
             else
             {
-                if (!gamemodeStatus.PrimaryHandlersEnabled) { return; }
+                if (!GamemodeStatus.PrimaryEventsEnabled) { Log.Debug("EnablePrimary: Primary events are already disabled.", Plugin.Debug); return; }
+
                 Handlers.Server.WaitingForPlayers -= WaitingForPlayers;
                 Handlers.Server.RoundStarted -= RoundStarted;
                 Handlers.Server.RoundEnded -= RoundEnded;
                 Handlers.Server.RestartingRound -= RestartingRound;
-                gamemodeStatus.PrimaryHandlersEnabled = false;
-                gamemodeStatus.Enabled = false;
+
+                GamemodeStatus.PrimaryEventsEnabled = false;
             }
         }
 
         internal void EnableSecondary(bool enable = true)
         {
+            Log.Debug($"EnableSecondary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", Plugin.Debug);
             if (enable)
             {
-                if (gamemodeStatus.SecondaryHandlersEnabled) { return; }
-                Handlers.Player.Joined += Joined;
-                //Handlers.Player.Left += Left;
-                Handlers.Server.RespawningTeam += RespawningTeam;
-                gamemodeStatus.SecondaryHandlersEnabled = true;
+                if (GamemodeStatus.SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already enabled.", Plugin.Debug); return; }
+
+
+
+                GamemodeStatus.SecondaryEventsEnabled = true;
             }
             else
             {
-                if (!gamemodeStatus.SecondaryHandlersEnabled) { return; }
-                Handlers.Player.Joined -= Joined;
-                //Handlers.Player.Left -= Left;
-                Handlers.Server.RespawningTeam -= RespawningTeam;
-                gamemodeStatus.SecondaryHandlersEnabled = false;
+                if (!GamemodeStatus.SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already disabled.", Plugin.Debug); return; }
+
+
+
+                GamemodeStatus.SecondaryEventsEnabled = false;
             }
         }
 
-        // Primary Events
-        private void WaitingForPlayers()
+        internal IEnumerator<float> SetupEvent()
         {
-            Log.Debug("Primary Event WaitingForPlayers called.", plugin.Debug);
-            gamemodeStatus.WaitingForPlayers = true;
-            EnableSecondary();
-        }
+            Log.Debug("SetupEvent called.", MurderMystery.Singleton.Debug);
 
-        private void RoundStarted()
-        {
-            Log.Debug("Primary Event RoundStarted called.", plugin.Debug);
-            if (plugin.Config.RequireRoundRestart && !gamemodeStatus.WaitingForPlayers) { Log.Debug("RequireRoundRestart is enabled, the round will not begin because a restart has not occured.", plugin.Debug); return; }
-            if (!plugin.Config.RequireRoundRestart && !gamemodeStatus.WaitingForPlayers) { EnableSecondary(); }
-            gamemodeStatus.RoundStarted = true;
-            Coroutines.Add(Timing.RunCoroutine(SetupMap()));
-            Coroutines.Add(Timing.RunCoroutine(MMPlayer.SetupPlayers()));
-            Coroutines.Add(Timing.RunCoroutine(HandoutEquipment(plugin.Config.EquipmentCooldown)));
-        }
-
-        private void RoundEnded(RoundEndedEventArgs ev)
-        {
-            Log.Debug("Primary Event RoundEnded called.", plugin.Debug);
-            DisableEvent();
-        }
-
-        private void RestartingRound()
-        {
-            Log.Debug("Primary Event RestartingRound called.", plugin.Debug);
-            DisableEvent();
-        }
-
-        // Secondary Events
-        private void Joined(JoinedEventArgs ev)
-        {
-            if (gamemodeStatus.Active)
+            foreach (DoorVariant door in Map.Doors)
             {
-                ev.Player.Broadcast(15, $"<size=30>Murder Mystery gamemode is currently in progress.\n{plugin.VersionStr}</size>");
-            }
-            else if (gamemodeStatus.RoundStarted)
-            {
-                ev.Player.Broadcast(15, $"<size=30>Murder Mystery gamemode has ended.\n{plugin.VersionStr}</size>");
-            }
-            else
-            {
-                ev.Player.Broadcast(15, $"<size=30>Murder Mystery gamemode is enabled for this round.\n{plugin.VersionStr}</size>");
-            }
-        }
-
-        private void Left(LeftEventArgs ev)
-        {
-            // TODO: If a detective leaves the game, a new one will be set to balance the game properly.
-        }
-
-        private void RespawningTeam(RespawningTeamEventArgs ev)
-        {
-            ev.IsAllowed = false;
-        }
-
-
-        // Basic Functions
-        private void DisableEvent()
-        {
-            EnablePrimary(false);
-            EnableSecondary(false);
-            foreach (CoroutineHandle handle in Coroutines)
-            {
-                Timing.KillCoroutines(handle);
-            }
-            gamemodeStatus.Active = false; // Active property will be used to determine if coroutines are running.
-            gamemodeStatus.WaitingForPlayers = false;
-            gamemodeStatus.RoundStarted = false;
-        }
-        private IEnumerator<float> SetupMap()
-        {
-            yield return Timing.WaitForSeconds(0.5f);
-            foreach (Door door in Map.Doors)
-            {
-                switch (door.PermissionLevels)
+                switch (door.RequiredPermissions.RequiredPermissions)
                 {
-                    case 0:
-                        break;
-                    case Door.AccessRequirements.Checkpoints:
-                        door.NetworkisOpen = false;
-                        door.Networklocked = true;
-                        break;
+                    case KeycardPermissions.None:
+                        continue;
+                    case KeycardPermissions.Checkpoints:
+                        door.ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        door.NetworkTargetState = false;
+                        continue;
                     default:
-                        door.NetworkisOpen = true;
-                        door.Networklocked = true;
-                        break;
+                        door.ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        door.NetworkTargetState = true;
+                        continue;
                 }
             }
             yield return Timing.WaitForSeconds(0.2f);
@@ -159,17 +156,6 @@ namespace MurderMystery
             {
                 item.Delete();
             }
-        }
-        private IEnumerator<float> HandoutEquipment(float waittime)
-        {
-            yield return Timing.WaitForSeconds(waittime);
-            // do stuff
-        }
-
-        internal CoroutineHandle AddCoroutine(CoroutineHandle handle)
-        {
-            Coroutines.Add(handle);
-            return handle;
         }
     }
 }

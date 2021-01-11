@@ -4,37 +4,37 @@ using System;
 
 namespace MurderMystery.Commands
 {
-    public class Disable : ICommand
+    class Disable : ICommand
     {
-        public string Command { get; } = "disable";
+        public string Command => "disable";
 
-        public string[] Aliases { get; } = new string[] { "d" };
+        public string[] Aliases => new string[] { "dis" };
 
-        public string Description { get; } = "Disables the murder mystery gamemode.";
+        public string Description => "Disables the gamemode.";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!sender.CheckPermission("mm.enable"))
             {
-                response = "You don't have permission to execute this command.";
+                response = "You don't have permission to disable the murder mystery gamemode.";
                 return false;
             }
-            if (!Plugin.GamemodeStatus.Enabled)
+
+            if (!MurderMystery.GamemodeStatus.Enabled)
             {
-                response = "The gamemode is already disabled!";
+                response = "The murder mystery gamemode is already disabled.";
                 return false;
             }
-            else if (!Plugin.GamemodeStatus.RoundStarted && !Plugin.GamemodeStatus.Active)
+
+            if (MurderMystery.GamemodeStatus.Started)
             {
-                Plugin.EventHandlers.EnablePrimary(false);
-                response = "Gamemode was disabled successfully.";
-                return true;
-            }
-            else
-            {
-                response = "You can't disable the gamemode if it has already started!";
+                response = "The murder mystery gamemode is currently active, and cannot be disabled.";
                 return false;
             }
+
+            MurderMystery.EventHandlers.EnableGamemode(false);
+            response = $"The murder mystery gamemode has been disabled.";
+            return true;
         }
     }
 }

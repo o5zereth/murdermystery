@@ -4,32 +4,36 @@ using System;
 
 namespace MurderMystery.Commands
 {
-    public class Enable : ICommand
+    class Enable : ICommand
     {
-        public string Command { get; } = "enable";
+        public string Command => "enable";
 
-        public string[] Aliases { get; } = new string[] { "e" };
+        public string[] Aliases => new string[] { "en" };
 
-        public string Description { get; } = "Enables the murder mystery gamemode.";
+        public string Description => "Enables the gamemode.";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!sender.CheckPermission("mm.enable"))
             {
-                response = "You don't have permission to execute this command.";
+                response = "You don't have permission to enable the murder mystery gamemode.";
                 return false;
             }
-            if (!Plugin.GamemodeStatus.Enabled)
+
+            if (MurderMystery.GamemodeStatus.Enabled && !MurderMystery.GamemodeStatus.Started)
             {
-                Plugin.EventHandlers.EnablePrimary();
-                response = "Gamemode was enabled successfully.";
-                return true;
-            }
-            else
-            {
-                response = "The gamemode is already enabled!";
+                response = "The murder mystery gamemode is already enabled.";
                 return false;
             }
+            else if (MurderMystery.GamemodeStatus.Started)
+            {
+                response = "The murder mystery gamemode is currently active.";
+                return false;
+            }
+
+            MurderMystery.EventHandlers.EnableGamemode();
+            response = $"The murder mystery gamemode has been enabled{(MurderMystery.Singleton.Config.RequireRoundRestart ? " for the next round" : "")}.";
+            return true;
         }
     }
 }
