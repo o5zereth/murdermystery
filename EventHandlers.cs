@@ -1,11 +1,15 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
 using MEC;
+using System.Linq;
 using System.Collections.Generic;
 using Handlers = Exiled.Events.Handlers;
 using MurderMystery.Extensions;
 using Interactables.Interobjects.DoorUtils;
 using MurderMystery.Utils;
+using MurderMystery.Enums;
+using CustomPlayerEffects;
+using Exiled.API.Enums;
 
 namespace MurderMystery
 {
@@ -16,6 +20,8 @@ namespace MurderMystery
         internal EventHandlers() { }
 
         internal List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
+
+        internal bool ForceRoundEnd = false;
 
         private void WaitingForPlayers()
         {
@@ -41,6 +47,7 @@ namespace MurderMystery
 
             EnableSecondary(false);
             Coroutines.KillAll();
+            Coroutines = new List<CoroutineHandle>();
 
             GamemodeStatus.Ended = true;
         }
@@ -53,8 +60,196 @@ namespace MurderMystery
             EnableGamemode(false);
         }
 
+        private void Joined(JoinedEventArgs ev)
+        {
+            MMPlayer ply = MMPlayer.Get(ev.Player);
+
+            if (GamemodeStatus.Enabled && !GamemodeStatus.Started)
+            {
+                ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode is enabled for this round.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
+            }
+            else if (GamemodeStatus.Started)
+            {
+                ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode is currently in progress.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
+                ply.SoftlySetRole(MMRole.Spectator);
+            }
+            else if (GamemodeStatus.Ended)
+            {
+                ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode has ended.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
+            }
+        }
+        private void EndingRound(EndingRoundEventArgs ev)
+        {
+            ev.IsAllowed = false;
+
+            if (Round.ElapsedTime.TotalMilliseconds <= 5) { return; }
+
+            if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0)
+            {
+                ev.IsAllowed = true;
+                Map.Broadcast(15, "<size=30><color=#00ff00>Innocents won!</color></size>");
+            }
+            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() > 0)
+            {
+                ev.IsAllowed = true;
+                Map.Broadcast(15, "<size=30><color=#ff0000>Murderers won!</color></size>");
+            }
+            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0)
+            {
+
+            }
+            else if (ForceRoundEnd)
+            {
+                ev.IsAllowed = true;
+                Map.Broadcast(15, "<size=30><color=#000000>Round has been force ended by an admin.</color></size>");
+            }
+        }
+        private void Dying(DyingEventArgs ev)
+        {
+            MMPlayer target = MMPlayer.Get(ev.Target);
+            target.RoleBeforeDeath = target.Role;
+        }
+        private void Died(DiedEventArgs ev)
+        {
+            MMPlayer target = MMPlayer.Get(ev.Target);
+            MMPlayer killer = MMPlayer.Get(ev.Killer);
+
+            target.SoftlySetRole(MMRole.Spectator);
+
+            switch (target.RoleBeforeDeath, killer.Role)
+            {
+                case (MMRole.Innocent, MMRole.Detective):
+                    killer.Player.EnableEffect<Flashed>(30);
+                    killer.Player.DropItem(killer.Player.Inventory.items.FirstOrDefault(x => x.id == ItemType.GunCOM15));
+                    break;
+            }
+        }
+        private void SpawningRagdoll(SpawningRagdollEventArgs ev)
+        {
+            ev.PlayerNickname = $"[{MMPlayer.Get(ev.Owner).RoleBeforeDeath.GetRoleAsColoredString()}] " + ev.PlayerNickname;
+        }
+        private void PickingUpItem(PickingUpItemEventArgs ev)
+        {
+            MMPlayer ply = MMPlayer.Get(ev.Player);
+
+            switch (ply.Role, ev.Pickup.ItemId)
+            {
+                case (MMRole.Innocent, ItemType.KeycardFacilityManager):
+                case (MMRole.Innocent, ItemType.KeycardNTFCommander):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Innocent, ItemType.GunCOM15):
+                    if (ev.Pickup.weaponMods.Barrel != (int)BarrelType.Suppressor)
+                    {
+                        if (ply.Player.Inventory.items.Count > 6)
+                        {
+                            ply.Player.Broadcast(5, "<size=25><color=#ff0000>You must have atleast 2 available slots to pickup the detectives weapon.</color></size>", Broadcast.BroadcastFlags.Monospaced);
+                            ev.IsAllowed = false;
+                            return;
+                        }
+                        else
+                        {
+                            ply.SoftlySetRole(MMRole.Detective);
+                            ply.Player.AddItem(ItemType.KeycardNTFCommander);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        ev.IsAllowed = false;
+                        ply.Player.Broadcast(3, "<size=30><color=#ff0000>You can't pickup a murderers weapon.</color></size>", Broadcast.BroadcastFlags.Monospaced);
+                    }
+                    return;
+                case (MMRole.Innocent, ItemType.SCP268):
+                    ev.IsAllowed = false;
+                    return;
 
 
+                case (MMRole.Murderer, ItemType.KeycardFacilityManager):
+                case (MMRole.Murderer, ItemType.KeycardNTFCommander):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Murderer, ItemType.GunCOM15):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Murderer, ItemType.SCP268):
+                    ev.IsAllowed = false;
+                    return;
+
+                case (MMRole.Detective, ItemType.KeycardFacilityManager):
+                case (MMRole.Detective, ItemType.KeycardNTFCommander):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Detective, ItemType.GunCOM15):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Detective, ItemType.SCP268):
+                    ev.IsAllowed = false;
+                    return;
+
+                default:
+                    return;
+            }
+        }
+        private void DroppingItem(DroppingItemEventArgs ev)
+        {
+            MMPlayer Player = MMPlayer.Get(ev.Player);
+
+            switch (Player.Role, ev.Item.id)
+            {
+                case (MMRole.Murderer, ItemType.KeycardFacilityManager):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Murderer, ItemType.GunCOM15):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Murderer, ItemType.SCP268):
+                    ev.IsAllowed = false;
+                    return;
+
+                case (MMRole.Detective, ItemType.KeycardNTFCommander):
+                    ev.IsAllowed = false;
+                    return;
+                case (MMRole.Detective, ItemType.GunCOM15):
+                    ev.IsAllowed = false;
+                    return;
+            }
+        }
+        private void InteractingLocker(InteractingLockerEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
+        private void Shooting(ShootingEventArgs ev)
+        {
+            MMPlayer shooter = MMPlayer.Get(ev.Shooter);
+            MMPlayer target;
+
+            if (Player.Get(ev.Target) != null)
+            {
+                target = MMPlayer.Get(Player.Get(ev.Target));
+            }
+            else { return; }
+
+            switch (shooter.Role, target.Role)
+            {
+                case (MMRole.Murderer, MMRole.Murderer):
+                    ev.IsAllowed = false;
+                    shooter.Player.ShowHint("You cannot shoot a fellow murderer.");
+                    return;
+                case (MMRole.Detective, MMRole.Detective):
+                    ev.IsAllowed = false;
+                    shooter.Player.ShowHint("You cannot shoot a fellow detective.");
+                    return;
+            }
+        }
+        private void TriggeringTesla(TriggeringTeslaEventArgs ev)
+        {
+            ev.IsTriggerable = false;
+        }
+        private void RespawningTeam(RespawningTeamEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
 
 
         internal void EnableGamemode(bool enable = true)
@@ -74,7 +269,7 @@ namespace MurderMystery
 
                 EnablePrimary(false);
 
-                if (!GamemodeStatus.Ended && GamemodeStatus.SecondaryEventsEnabled) { EnableSecondary(false); Coroutines.KillAll(); }
+                if (!GamemodeStatus.Ended && GamemodeStatus.SecondaryEventsEnabled) { EnableSecondary(false); Coroutines.KillAll(); Coroutines = new List<CoroutineHandle>(); }
 
                 GamemodeStatus.Enabled = false;
                 GamemodeStatus.Ended = false;
@@ -117,7 +312,17 @@ namespace MurderMystery
             {
                 if (GamemodeStatus.SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already enabled.", Plugin.Debug); return; }
 
-
+                Handlers.Player.Joined += Joined;
+                Handlers.Server.EndingRound += EndingRound;
+                Handlers.Player.Dying += Dying;
+                Handlers.Player.Died += Died;
+                Handlers.Player.SpawningRagdoll += SpawningRagdoll;
+                Handlers.Player.PickingUpItem += PickingUpItem;
+                Handlers.Player.DroppingItem += DroppingItem;
+                Handlers.Player.InteractingLocker += InteractingLocker;
+                Handlers.Player.Shooting += Shooting;
+                Handlers.Player.TriggeringTesla += TriggeringTesla;
+                Handlers.Server.RespawningTeam += RespawningTeam;
 
                 GamemodeStatus.SecondaryEventsEnabled = true;
             }
@@ -125,7 +330,17 @@ namespace MurderMystery
             {
                 if (!GamemodeStatus.SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already disabled.", Plugin.Debug); return; }
 
-
+                Handlers.Player.Joined -= Joined;
+                Handlers.Server.EndingRound -= EndingRound;
+                Handlers.Player.Dying -= Dying;
+                Handlers.Player.Died -= Died;
+                Handlers.Player.SpawningRagdoll -= SpawningRagdoll;
+                Handlers.Player.PickingUpItem -= PickingUpItem;
+                Handlers.Player.DroppingItem -= DroppingItem;
+                Handlers.Player.InteractingLocker -= InteractingLocker;
+                Handlers.Player.Shooting -= Shooting;
+                Handlers.Player.TriggeringTesla -= TriggeringTesla;
+                Handlers.Server.RespawningTeam -= RespawningTeam;
 
                 GamemodeStatus.SecondaryEventsEnabled = false;
             }

@@ -8,7 +8,7 @@ namespace MurderMystery.Extensions
     {
         public static void KillAll(this List<CoroutineHandle> list)
         {
-            Log.Debug("KillAndRemoveAll was called.", MurderMystery.Singleton.Debug);
+            Log.Debug("KillAll was called.", MurderMystery.Singleton.Debug);
 
             foreach (CoroutineHandle handle in list)
             {

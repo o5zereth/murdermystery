@@ -41,5 +41,24 @@ namespace MurderMystery.Extensions
         {
             return (ply.Role == MMRole.Detective || ply.Role == MMRole.Murderer || ply.Role == MMRole.Innocent);
         }
+
+        public static string GetRoleAsColoredString(this MMRole role)
+        {
+            switch (role)
+            {
+                case MMRole.None:
+                    return "<color=#ffffff>None</color>";
+                case MMRole.Spectator:
+                    return "<color=#7f7f7f>Spectator</color>";
+                case MMRole.Innocent:
+                    return "<color=#00ff00>Innocent</color>";
+                case MMRole.Murderer:
+                    return "<color=#ff0000>Murderer</color>";
+                case MMRole.Detective:
+                    return "<color=#0000ff>Detective</color>";
+                default:
+                    return null;
+            }
+        }
     }
 }

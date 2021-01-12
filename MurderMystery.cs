@@ -1,5 +1,7 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using Handlers = Exiled.Events.Handlers;
+using MurderMystery.Utils;
 using HarmonyLib;
 using System;
 
@@ -19,6 +21,7 @@ namespace MurderMystery
         internal static EventHandlers EventHandlers { get; private set; }
         internal static GamemodeStatus GamemodeStatus { get; private set; }
         internal static Harmony Harmony { get; private set; }
+        internal static string VersionStr => $"<size=20>[Version: {Singleton.Version.Major}.{Singleton.Version.Minor}.{Singleton.Version.Build} Public Alpha] (Debug: {Singleton.Debug})</size>";
 
         private bool reloading = false;
 
@@ -31,6 +34,10 @@ namespace MurderMystery
             Harmony = new Harmony("zereth.plugins.murdermystery");
             Harmony.PatchAll();
 
+            Handlers.Player.Joined += MMPlayer.Add;
+            Handlers.Player.Left += MMPlayer.Remove;
+            Handlers.Server.RestartingRound += MMPlayer.RemoveAll;
+
             Singleton = this;
             EventHandlers = new EventHandlers();
             GamemodeStatus = new GamemodeStatus();
@@ -40,16 +47,11 @@ namespace MurderMystery
 
         public override void OnDisabled()
         {
-            EventHandlers.EnablePrimary(!GamemodeStatus.PrimaryEventsEnabled);
-            EventHandlers.EnablePrimary(!GamemodeStatus.PrimaryEventsEnabled);
-
-            EventHandlers.EnableSecondary(!GamemodeStatus.SecondaryEventsEnabled);
-            EventHandlers.EnableSecondary(!GamemodeStatus.SecondaryEventsEnabled);
-
-            Harmony.UnpatchAll();
-            Harmony.PatchAll();
-
             if (reloading) { base.OnDisabled(); return; }
+                
+            Handlers.Player.Joined -= MMPlayer.Add;
+            Handlers.Player.Left -= MMPlayer.Remove;
+            Handlers.Server.RestartingRound -= MMPlayer.RemoveAll;
 
             Singleton = null;
             EventHandlers = null;

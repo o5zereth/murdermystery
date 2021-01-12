@@ -8,10 +8,10 @@ namespace MurderMystery.Patches
     [HarmonyPatch(typeof(CharacterClassManager), nameof(CharacterClassManager.CallRpcRoundStarted))]
     internal class RoundStarting
     {
-        private static void Prefix(CharacterClassManager __instance)
+        private static bool Prefix(CharacterClassManager __instance)
         {
-            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeStatus.WaitingForPlayers) { return; }
-            if (!MurderMystery.GamemodeStatus.Enabled) { return; }
+            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeStatus.WaitingForPlayers) { return true; }
+            if (!MurderMystery.GamemodeStatus.Enabled) { return true; }
 
             Log.Debug("RoundStarting prefix patch has been called.");
 
@@ -23,6 +23,8 @@ namespace MurderMystery.Patches
                     ply.SoftlySetRole(MMRole.Spectator);
                 }
             }
+
+            return true;
         }
     }
 }

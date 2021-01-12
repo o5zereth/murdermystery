@@ -17,10 +17,13 @@ namespace MurderMystery.Utils
         {
             Player = player;
             Role = MMRole.None;
+            RoleBeforeDeath = MMRole.None;
         }
 
         public Player Player { get; }
         public MMRole Role { get; private set; }
+        public MMRole RoleBeforeDeath { get; internal set; }
+        //public bool InnocentKillCooldown { get; set; }
 
         internal void SoftlySetRole(MMRole role)
         {
@@ -31,7 +34,12 @@ namespace MurderMystery.Utils
 
         public static IEnumerable<MMPlayer> List => Dictionary.Values;
 
-        public static readonly Dictionary<Player, MMPlayer> Dictionary = new Dictionary<Player, MMPlayer>();
+        private static Dictionary<Player, MMPlayer> Dictionary = new Dictionary<Player, MMPlayer>();
+
+        public static MMPlayer Get(Player player)
+        {
+            return (Dictionary.TryGetValue(player, out MMPlayer ply) ? ply : null);
+        }
 
         internal static IEnumerator<float> SetupPlayers()
         {
@@ -104,8 +112,34 @@ namespace MurderMystery.Utils
                 }
                 else
                 {
-                    ply.Player.SetRole(RoleType.Spectator);
                     BroadcastRoleInfo(ply);
+                }
+            }
+
+            MurderMystery.EventHandlers.Coroutines.RunAndAdd(HandOutEquipment(MurderMystery.Singleton.Config.EquipmentTime));
+        }
+        internal static IEnumerator<float> HandOutEquipment(float delay)
+        {
+            yield return Timing.WaitForSeconds(delay);
+
+            foreach (MMPlayer ply in List.AliveList())
+            {
+                switch (ply.Role)
+                {
+                    case MMRole.Murderer:
+                        ply.Player.AddItem(ItemType.KeycardFacilityManager);
+                        ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = 12f, id = ItemType.GunCOM15, modBarrel = (int)BarrelType.Suppressor, modOther = (int)OtherType.Flashlight, modSight = (int)SightType.None });
+                        ply.Player.AddItem(ItemType.SCP268);
+                        ply.Player.Broadcast(10, "<size=30><color=#ff0000>You have received your equipment.</color></size>");
+                        break;
+                    case MMRole.Detective:
+                        ply.Player.AddItem(ItemType.KeycardNTFCommander);
+                        ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = 12f, id = ItemType.GunCOM15, modBarrel = (int)BarrelType.None, modOther = (int)OtherType.Flashlight, modSight = (int)SightType.None });
+                        ply.Player.AddItem(ItemType.Medkit);
+                        ply.Player.Broadcast(10, "<size=30><color=#0000ff>You have received your equipment.</color></size>");
+                        break;
+                    default:
+                        continue;
                 }
             }
         }
@@ -207,11 +241,17 @@ namespace MurderMystery.Utils
 
         internal static void Add(JoinedEventArgs ev)
         {
+            Log.Debug("Player added to list.");
             Dictionary.Add(ev.Player, new MMPlayer(ev.Player));
         }
         internal static void Remove(LeftEventArgs ev)
         {
+            Log.Debug("Player removed from list.");
             Dictionary.Remove(ev.Player);
+        }
+        internal static void RemoveAll()
+        {
+            Dictionary = new Dictionary<Player, MMPlayer>();
         }
     }
 }
