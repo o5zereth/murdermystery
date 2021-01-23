@@ -19,7 +19,7 @@ namespace MurderMystery.Patches
             {
                 if (ply.Player.IsOverwatchEnabled)
                 {
-                    Log.Debug($"Player: {ply.Player.Nickname} is being set to spectator because of overwatch.");
+                    Log.Debug($"Player: {ply.Player.Nickname} is being set to spectator because of overwatch.", MurderMystery.Singleton.Debug);
                     ply.SoftlySetRole(MMRole.Spectator);
                 }
             }

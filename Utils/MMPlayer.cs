@@ -38,7 +38,7 @@ namespace MurderMystery.Utils
 
         public static MMPlayer Get(Player player)
         {
-            return (Dictionary.TryGetValue(player, out MMPlayer ply) ? ply : null);
+            return Dictionary.TryGetValue(player, out MMPlayer ply) ? ply : null;
         }
 
         internal static IEnumerator<float> SetupPlayers()

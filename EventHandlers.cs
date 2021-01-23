@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Features;
-using Exiled.Events.EventArgs;
 using MEC;
+using Exiled.Events.EventArgs;
 using System.Linq;
 using System.Collections.Generic;
 using Handlers = Exiled.Events.Handlers;
@@ -10,6 +10,9 @@ using MurderMystery.Utils;
 using MurderMystery.Enums;
 using CustomPlayerEffects;
 using Exiled.API.Enums;
+using Exiled.API.Extensions;
+using static Broadcast;
+using UnityEngine;
 
 namespace MurderMystery
 {
@@ -34,6 +37,11 @@ namespace MurderMystery
             Log.Debug("RoundStarted Primary Event called.", Plugin.Debug);
 
             if (Plugin.Config.RequireRoundRestart && !GamemodeStatus.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
+
+            if (MMPlayer.List.Count() < 8 && !Plugin.Debug)
+            {
+                Map.Broadcast(10, "<size=30>There must be atleast 8 players to start the gamemode!</size>", BroadcastFlags.Monospaced);
+            }
 
             GamemodeStatus.Started = true;
 
@@ -82,7 +90,7 @@ namespace MurderMystery
         {
             ev.IsAllowed = false;
 
-            if (Round.ElapsedTime.TotalMilliseconds <= 5) { return; }
+            if (Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
 
             if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0)
             {
@@ -96,12 +104,13 @@ namespace MurderMystery
             }
             else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0)
             {
-
+                ev.IsAllowed = true;
+                Map.Broadcast(15, "<size=30><color=#7f7f7f>Draw, everyone loses!</color></size>\n<size=20>also, how did this happen?</size>");
             }
             else if (ForceRoundEnd)
             {
                 ev.IsAllowed = true;
-                Map.Broadcast(15, "<size=30><color=#000000>Round has been force ended by an admin.</color></size>");
+                Map.Broadcast(15, "<size=30><color=#ffffff>Round has been force ended by an admin.</color></size>");
             }
         }
         private void Dying(DyingEventArgs ev)
@@ -143,13 +152,14 @@ namespace MurderMystery
                     {
                         if (ply.Player.Inventory.items.Count > 6)
                         {
-                            ply.Player.Broadcast(5, "<size=25><color=#ff0000>You must have atleast 2 available slots to pickup the detectives weapon.</color></size>", Broadcast.BroadcastFlags.Monospaced);
+                            ply.Player.Broadcast(5, "<size=25><color=#ff0000>You must have atleast 2 available slots to pickup the detectives weapon.</color></size>", BroadcastFlags.Monospaced);
                             ev.IsAllowed = false;
                             return;
                         }
                         else
                         {
                             ply.SoftlySetRole(MMRole.Detective);
+                            RemoveNearestDetectiveCard();
                             ply.Player.AddItem(ItemType.KeycardNTFCommander);
                             return;
                         }
@@ -157,7 +167,7 @@ namespace MurderMystery
                     else
                     {
                         ev.IsAllowed = false;
-                        ply.Player.Broadcast(3, "<size=30><color=#ff0000>You can't pickup a murderers weapon.</color></size>", Broadcast.BroadcastFlags.Monospaced);
+                        ply.Player.Broadcast(3, "<size=30><color=#ff0000>You can't pickup a murderers weapon.</color></size>", BroadcastFlags.Monospaced);
                     }
                     return;
                 case (MMRole.Innocent, ItemType.SCP268):
@@ -189,6 +199,13 @@ namespace MurderMystery
 
                 default:
                     return;
+            }
+
+            void RemoveNearestDetectiveCard()
+            {
+                Pickup item = ev.Pickup;
+
+                UnityEngine.Object.FindObjectsOfType<Pickup>().Where(x => x.ItemId == ItemType.KeycardNTFCommander).OrderBy(x => Vector3.Distance(x.transform.position, item.transform.position)).First().Delete();
             }
         }
         private void DroppingItem(DroppingItemEventArgs ev)
@@ -366,10 +383,20 @@ namespace MurderMystery
                         continue;
                 }
             }
+
             yield return Timing.WaitForSeconds(0.2f);
+
             foreach (Pickup item in UnityEngine.Object.FindObjectsOfType<Pickup>())
             {
                 item.Delete();
+            }
+
+            foreach (Lift lift in Map.Lifts)
+            {
+                if (lift.Type() == ElevatorType.LczA || lift.Type() == ElevatorType.LczB)
+                {
+                    lift.Network_locked = true;
+                }
             }
         }
     }

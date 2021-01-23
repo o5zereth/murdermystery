@@ -21,13 +21,13 @@ namespace MurderMystery
         internal static EventHandlers EventHandlers { get; private set; }
         internal static GamemodeStatus GamemodeStatus { get; private set; }
         internal static Harmony Harmony { get; private set; }
-        internal static string VersionStr => $"<size=20>[Version: {Singleton.Version.Major}.{Singleton.Version.Minor}.{Singleton.Version.Build} Public Alpha] (Debug: {Singleton.Debug})</size>";
+        internal static string VersionStr => $"[Version: {Singleton.Version.Major}.{Singleton.Version.Minor}.{Singleton.Version.Build} Public Alpha] (Debug: {Singleton.Debug})";
 
         private bool reloading = false;
 
         public override void OnEnabled()
         {
-            Config.Validate();
+            Config.Validate(this.Config);
 
             if (reloading) { base.OnEnabled(); reloading = false; return; }
 
