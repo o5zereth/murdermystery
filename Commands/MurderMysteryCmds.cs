@@ -9,11 +9,11 @@ namespace MurderMystery.Commands
     {
         public MurderMysteryCmds() => LoadGeneratedCommands();
 
-        public override string Command => "murdermystery";
+        public override string Command { get; } = "murdermystery";
 
-        public override string[] Aliases => new string[] { "mm" };
+        public override string[] Aliases { get; } = { "mm" };
 
-        public override string Description => "Parent command for murder mystery gamemode.";
+        public override string Description { get; } = "Parent command for murder mystery gamemode.";
 
         public override void LoadGeneratedCommands()
         {

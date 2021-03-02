@@ -1,9 +1,9 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
 using Handlers = Exiled.Events.Handlers;
-using MurderMystery.Utils;
 using HarmonyLib;
 using System;
+using MurderMystery.API;
 
 namespace MurderMystery
 {
@@ -13,13 +13,14 @@ namespace MurderMystery
         public override string Name => "MurderMystery";
         public override string Prefix => "murder_mystery";
         public override PluginPriority Priority => PluginPriority.Default;
-        public override Version RequiredExiledVersion => new Version(2, 1, 28);
-        public override Version Version => new Version(0, 1, 0);
+        public override Version RequiredExiledVersion => new Version(2, 3, 4);
+        public override Version Version => new Version(1, 0, 0);
         public bool Debug { get; } = true;
 
-        internal static MurderMystery Singleton { get; private set; }
+        public static MurderMystery Singleton { get; private set; }
         internal static EventHandlers EventHandlers { get; private set; }
-        internal static GamemodeStatus GamemodeStatus { get; private set; }
+        internal static GamemodeManager GamemodeManager { get; private set; }
+        internal static CoroutineManager CoroutineManager { get; private set; }
         internal static Harmony Harmony { get; private set; }
         internal static string VersionStr => $"[Version: {Singleton.Version.Major}.{Singleton.Version.Minor}.{Singleton.Version.Build} Public Alpha] (Debug: {Singleton.Debug})";
 
@@ -27,20 +28,21 @@ namespace MurderMystery
 
         public override void OnEnabled()
         {
-            Config.Validate(this.Config);
+            Config.Validate(Config);
 
             if (reloading) { base.OnEnabled(); reloading = false; return; }
 
             Harmony = new Harmony("zereth.plugins.murdermystery");
             Harmony.PatchAll();
 
-            Handlers.Player.Joined += MMPlayer.Add;
-            Handlers.Player.Left += MMPlayer.Remove;
+            Handlers.Player.Verified += MMPlayer.Add;
+            Handlers.Player.Destroying += MMPlayer.Remove;
             Handlers.Server.RestartingRound += MMPlayer.RemoveAll;
 
             Singleton = this;
             EventHandlers = new EventHandlers();
-            GamemodeStatus = new GamemodeStatus();
+            GamemodeManager = new GamemodeManager();
+            CoroutineManager = new CoroutineManager();
 
             base.OnEnabled();
         }
@@ -48,14 +50,18 @@ namespace MurderMystery
         public override void OnDisabled()
         {
             if (reloading) { base.OnDisabled(); return; }
-                
-            Handlers.Player.Joined -= MMPlayer.Add;
-            Handlers.Player.Left -= MMPlayer.Remove;
+
+            Harmony.UnpatchAll();
+            Harmony = null;
+
+            Handlers.Player.Verified -= MMPlayer.Add;
+            Handlers.Player.Destroying -= MMPlayer.Remove;
             Handlers.Server.RestartingRound -= MMPlayer.RemoveAll;
 
             Singleton = null;
             EventHandlers = null;
-            GamemodeStatus = null;
+            GamemodeManager = null;
+            CoroutineManager = null;
 
             base.OnDisabled();
         }

@@ -6,11 +6,11 @@ namespace MurderMystery.Commands
 {
     class Disable : ICommand
     {
-        public string Command => "disable";
+        public string Command { get; } = "disable";
 
-        public string[] Aliases => new string[] { "dis" };
+        public string[] Aliases { get; } = { "dis" };
 
-        public string Description => "Disables the gamemode.";
+        public string Description { get; } = "Disables the gamemode.";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -20,19 +20,19 @@ namespace MurderMystery.Commands
                 return false;
             }
 
-            if (!MurderMystery.GamemodeStatus.Enabled)
+            if (!MurderMystery.GamemodeManager.Enabled)
             {
                 response = "The murder mystery gamemode is already disabled.";
                 return false;
             }
 
-            if (MurderMystery.GamemodeStatus.Started)
+            if (MurderMystery.GamemodeManager.Started)
             {
                 response = "The murder mystery gamemode is currently active, and cannot be disabled.";
                 return false;
             }
 
-            MurderMystery.EventHandlers.EnableGamemode(false);
+            MurderMystery.GamemodeManager.EnableGamemode(false);
             response = $"The murder mystery gamemode has been disabled.";
             return true;
         }

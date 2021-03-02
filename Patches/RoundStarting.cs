@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
-using MurderMystery.Utils;
 using MurderMystery.Enums;
 using Exiled.API.Features;
+using MurderMystery.API;
 
 namespace MurderMystery.Patches
 {
@@ -10,10 +10,10 @@ namespace MurderMystery.Patches
     {
         private static bool Prefix(CharacterClassManager __instance)
         {
-            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeStatus.WaitingForPlayers) { return true; }
-            if (!MurderMystery.GamemodeStatus.Enabled) { return true; }
+            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { return true; }
+            if (!MurderMystery.GamemodeManager.Enabled) { return true; }
 
-            Log.Debug("RoundStarting prefix patch has been called.");
+            Log.Debug("RoundStarting prefix patch has been called.", MurderMystery.Singleton.Debug);
 
             foreach (MMPlayer ply in MMPlayer.List)
             {
