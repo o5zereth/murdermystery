@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
-using MurderMystery.Enums;
 using MurderMystery.Extensions;
 using System;
 using System.Linq;

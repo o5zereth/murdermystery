@@ -94,11 +94,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Enums.cs" />
     <Compile Include="Commands\Disable.cs" />
     <Compile Include="Commands\Enable.cs" />
     <Compile Include="Commands\MurderMysteryCmds.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Enums\MMRole.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Extensions\Coroutines.cs" />
     <Compile Include="Extensions\PlayerExt.cs" />
@@ -112,5 +112,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

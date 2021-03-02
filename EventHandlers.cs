@@ -5,7 +5,6 @@ using System.Linq;
 using System.Collections.Generic;
 using MurderMystery.Extensions;
 using Interactables.Interobjects.DoorUtils;
-using MurderMystery.Enums;
 using CustomPlayerEffects;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
