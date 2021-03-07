@@ -5,12 +5,11 @@ using MurderMystery.API;
 namespace MurderMystery.Patches
 {
     [HarmonyPatch(typeof(CharacterClassManager), nameof(CharacterClassManager.CallRpcRoundStarted))]
-    internal class RoundStarting
+    internal class RoundStartingPatch
     {
         private static bool Prefix(CharacterClassManager __instance)
         {
-            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { return true; }
-            if (!MurderMystery.GamemodeManager.Enabled) { return true; }
+            if ((MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) || !MurderMystery.GamemodeManager.Enabled) { return true; }
 
             Log.Debug("RoundStarting prefix patch has been called.", MurderMystery.Singleton.Debug);
 

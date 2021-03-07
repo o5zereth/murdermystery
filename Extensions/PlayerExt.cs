@@ -33,12 +33,12 @@ namespace MurderMystery.Extensions
 
         public static IEnumerable<MMPlayer> AliveList(this IEnumerable<MMPlayer> list)
         {
-            return list.Where(ply => ply.Role == MMRole.Detective || ply.Role == MMRole.Murderer || ply.Role == MMRole.Innocent);
+            return list.Where(ply => ply.Role == MMRole.Innocent || ply.Role == MMRole.Murderer || ply.Role == MMRole.Detective);
         }
 
         public static bool IsAlive(this MMPlayer ply)
         {
-            return (ply.Role == MMRole.Detective || ply.Role == MMRole.Murderer || ply.Role == MMRole.Innocent);
+            return (ply.Role == MMRole.Innocent || ply.Role == MMRole.Murderer || ply.Role == MMRole.Detective);
         }
 
         public static string GetRoleAsColoredString(this MMRole role)

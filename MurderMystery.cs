@@ -13,7 +13,7 @@ namespace MurderMystery
         public override string Name => "MurderMystery";
         public override string Prefix => "murder_mystery";
         public override PluginPriority Priority => PluginPriority.Default;
-        public override Version RequiredExiledVersion => new Version(2, 3, 4);
+        public override Version RequiredExiledVersion => new Version(2, 7, 0);
         public override Version Version => new Version(1, 0, 0);
         public bool Debug { get; } = true;
 

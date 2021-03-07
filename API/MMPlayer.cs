@@ -112,7 +112,7 @@ namespace MurderMystery.API
                 }
             }
 
-            MurderMystery.CoroutineManager.ServerCoroutines.RunAndAdd(HandOutEquipment(MurderMystery.Singleton.Config.EquipmentTime));
+            MurderMystery.CoroutineManager.RunServerCoroutine(HandOutEquipment(MurderMystery.Singleton.Config.EquipmentTime));
         }
         internal static IEnumerator<float> HandOutEquipment(float delay)
         {

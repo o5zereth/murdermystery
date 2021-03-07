@@ -48,11 +48,7 @@ namespace MurderMystery.API
                 {
                     EnableSecondary(false);
 
-                    MurderMystery.CoroutineManager.ServerCoroutines.KillAll();
-                    MurderMystery.CoroutineManager.ServerCoroutines.Clear();
-
-                    MurderMystery.CoroutineManager.PlayerCoroutines.KillAll();
-                    MurderMystery.CoroutineManager.PlayerCoroutines.Clear();
+                    MurderMystery.CoroutineManager.Reset();
                 }
 
                 Enabled = false;

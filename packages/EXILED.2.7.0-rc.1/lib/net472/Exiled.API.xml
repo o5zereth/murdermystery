@@ -1584,6 +1584,113 @@
             Gets all the <see cref="T:Exiled.API.Enums.ElevatorType"/> values for the <see cref="T:Lift"/> instances using <see cref="F:Lift.elevatorName"/> and <see cref="T:UnityEngine.GameObject"/> name.
             </summary>
         </member>
+        <member name="T:Exiled.API.Extensions.MirrorExtensions">
+            <summary>
+            A set of extensions for <see cref="N:Mirror"/> Networking.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Extensions.MirrorExtensions.WriterExtensions">
+            <summary>
+            Gets <see cref="T:System.Reflection.MethodInfo"/> corresponding to <see cref="T:System.Type"/>.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Extensions.MirrorExtensions.SyncVarDirtyBits">
+            <summary>
+            Gets a all DirtyBit <see cref="T:System.UInt64"/> from <see cref="T:Exiled.API.Extensions.String"/>(format:classname.methodname).
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Extensions.MirrorExtensions.SetDirtyBitsMethodInfo">
+            <summary>
+            Gets a <see cref="M:Mirror.NetworkBehaviour.SetDirtyBit(System.UInt64)"/>'s <see cref="T:System.Reflection.MethodInfo"/>.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Extensions.MirrorExtensions.SendSpawnMessageMethodInfo">
+            <summary>
+            Gets a NetworkServer.SendSpawnMessage's <see cref="T:System.Reflection.MethodInfo"/>.
+            </summary>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.Shake(Exiled.API.Features.Player)">
+            <summary>
+            Shaking target <see cref="T:Exiled.API.Features.Player"/> window.
+            </summary>
+            <param name="player">Target to shake.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.PlayBeepSound(Exiled.API.Features.Player)">
+            <summary>
+            Play beep sound to <see cref="T:Exiled.API.Features.Player"/>.
+            </summary>
+            <param name="player">Target to play.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.SetPlayerInfoForTargetOnly(Exiled.API.Features.Player,Exiled.API.Features.Player,System.String)">
+            <summary>
+            Set <see cref="P:NicknameSync.Network_customPlayerInfoString"/> that only <see cref="T:Exiled.API.Features.Player"/> can see.
+            </summary>
+            <param name="player">Only this player can see info.</param>
+            <param name="target">Target to set info.</param>
+            <param name="info">Setting info.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(Exiled.API.Features.Player,RoleType)">
+            <summary>
+            Change <see cref="T:Exiled.API.Features.Player"/> character model for appearance.
+            It will continue until <see cref="T:Exiled.API.Features.Player"/>'s <see cref="T:RoleType"/> changes.
+            </summary>
+            <param name="player">Player to change.</param>
+            <param name="type">Model type.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.PlayCassieAnnouncement(Exiled.API.Features.Player,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Send CASSIE announcement that only <see cref="T:Exiled.API.Features.Player"/> can hear.
+            It will continue until <see cref="T:Exiled.API.Features.Player"/>'s <see cref="T:RoleType"/> changes.
+            </summary>
+            <param name="player">Target to send.</param>
+            <param name="words">Announcement words.</param>
+            <param name="makeHold">Same on <see cref="M:Exiled.API.Features.Cassie.Message(System.String,System.Boolean,System.Boolean)"/>'s isHeld.</param>
+            <param name="makeNoise">Same on <see cref="M:Exiled.API.Features.Cassie.Message(System.String,System.Boolean,System.Boolean)"/>'s isNoisy.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.SendFakeSyncVar(Exiled.API.Features.Player,Mirror.NetworkIdentity,System.Type,System.String,System.Object)">
+            <summary>
+            Send fake values to client's <see cref="T:Mirror.SyncVarAttribute"/>.
+            </summary>
+            <param name="target">Target to send.</param>
+            <param name="behaviorOwner"><see cref="T:Mirror.NetworkIdentity"/> of object that owns <see cref="T:Mirror.NetworkBehaviour"/>.</param>
+            <param name="targetType"><see cref="T:Mirror.NetworkBehaviour"/>'s type.</param>
+            <param name="propertyName">Property name starting with Network.</param>
+            <param name="value">Value of send to target.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.ResyncSyncVar(Mirror.NetworkIdentity,System.Type,System.String)">
+            <summary>
+            Force resync to client's <see cref="T:Mirror.SyncVarAttribute"/>.
+            </summary>
+            <param name="behaviorOwner"><see cref="T:Mirror.NetworkIdentity"/> of object that owns <see cref="T:Mirror.NetworkBehaviour"/>.</param>
+            <param name="targetType"><see cref="T:Mirror.NetworkBehaviour"/>'s type.</param>
+            <param name="propertyName">Property name starting with Network.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.SendFakeTargetRpc(Exiled.API.Features.Player,Mirror.NetworkIdentity,System.Type,System.String,System.Object[])">
+            <summary>
+            Send fake values to client's <see cref="T:Mirror.ClientRpcAttribute"/>.
+            </summary>
+            <param name="target">Target to send.</param>
+            <param name="behaviorOwner"><see cref="T:Mirror.NetworkIdentity"/> of object that owns <see cref="T:Mirror.NetworkBehaviour"/>.</param>
+            <param name="targetType"><see cref="T:Mirror.NetworkBehaviour"/>'s type.</param>
+            <param name="rpcName">Property name starting with Rpc.</param>
+            <param name="values">Values of send to target.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.SendFakeSyncObject(Exiled.API.Features.Player,Mirror.NetworkIdentity,System.Type,System.Action{Mirror.NetworkWriter})">
+            <summary>
+            Send fake values to client's <see cref="T:Mirror.SyncObject"/>.
+            </summary>
+            <param name="target">Target to send.</param>
+            <param name="behaviorOwner"><see cref="T:Mirror.NetworkIdentity"/> of object that owns <see cref="T:Mirror.NetworkBehaviour"/>.</param>
+            <param name="targetType"><see cref="T:Mirror.NetworkBehaviour"/>'s type.</param>
+            <param name="customAction">Custom writing action.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.EditNetworkObject(Mirror.NetworkIdentity,System.Action{Mirror.NetworkIdentity})">
+            <summary>
+            Edit <see cref="T:Mirror.NetworkIdentity"/>'s parameter and sync.
+            </summary>
+            <param name="identity">Target object.</param>
+            <param name="customAction">Edit function.</param>
+        </member>
         <member name="T:Exiled.API.Extensions.RagdollExtensions">
             <summary>
             A set of extensions for <see cref="T:Ragdoll"/>.
@@ -1919,6 +2026,31 @@
         <member name="T:Exiled.API.Features.Map">
             <summary>
             A set of tools to easily handle the in-game map.
+            </summary>
+        </member>
+        <member name="F:Exiled.API.Features.Map.RoomsValue">
+            <summary>
+            A list of <see cref="T:Exiled.API.Features.Room"/>s on the map.
+            </summary>
+        </member>
+        <member name="F:Exiled.API.Features.Map.DoorsValue">
+            <summary>
+            A list of <see cref="T:Interactables.Interobjects.DoorUtils.DoorVariant"/>s on the map.
+            </summary>
+        </member>
+        <member name="F:Exiled.API.Features.Map.CamerasValue">
+            <summary>
+            A list of <see cref="T:Camera079"/>s on the map.
+            </summary>
+        </member>
+        <member name="F:Exiled.API.Features.Map.LiftsValue">
+            <summary>
+            A list of <see cref="T:Lift"/>s on the map.
+            </summary>
+        </member>
+        <member name="F:Exiled.API.Features.Map.TeslasValue">
+            <summary>
+            A list of <see cref="T:TeslaGate"/>s on the map.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Map.IsLCZDecontaminated">
@@ -2585,10 +2717,21 @@
             Gets or sets the player's maximum health.
             </summary>
         </member>
+        <member name="P:Exiled.API.Features.Player.ArtificialHealth">
+            <summary>
+            Gets or sets the player's artificial health.
+            If the health is greater than the <see cref="P:Exiled.API.Features.Player.MaxArtificialHealth"/>, it will also be changed to match the artificial health.
+            </summary>
+        </member>
         <member name="P:Exiled.API.Features.Player.AdrenalineHealth">
             <summary>
             Gets or sets the player's adrenaline health.
             If the health is greater than the <see cref="P:Exiled.API.Features.Player.MaxAdrenalineHealth"/>, the MaxAdrenalineHealth will also be changed to match the adrenaline health.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Player.MaxArtificialHealth">
+            <summary>
+            Gets or sets the player's maximum artificial health.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Player.MaxAdrenalineHealth">
@@ -2722,6 +2865,11 @@
         <member name="P:Exiled.API.Features.Player.HasHands">
             <summary>
             Gets a value indicating whether player has hands.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Player.Items">
+            <summary>
+            Gets player's items.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Player.UnverifiedPlayers">
@@ -3023,6 +3171,14 @@
             Enables a <see cref="T:CustomPlayerEffects.PlayerEffect">status effect</see> on the player.
             </summary>
             <typeparam name="T">The <see cref="T:CustomPlayerEffects.PlayerEffect"/> to enable.</typeparam>
+            <param name="duration">The amount of time the effect will be active for.</param>
+            <param name="addDurationIfActive">If the effect is already active, setting to true will add this duration onto the effect.</param>
+        </member>
+        <member name="M:Exiled.API.Features.Player.EnableEffect(CustomPlayerEffects.PlayerEffect,System.Single,System.Boolean)">
+            <summary>
+            Enables a <see cref="T:CustomPlayerEffects.PlayerEffect">status effect</see> on the player.
+            </summary>
+            <param name="effect">The name of the <see cref="T:CustomPlayerEffects.PlayerEffect"/> to enable.</param>
             <param name="duration">The amount of time the effect will be active for.</param>
             <param name="addDurationIfActive">If the effect is already active, setting to true will add this duration onto the effect.</param>
         </member>

@@ -18,7 +18,6 @@ namespace MurderMystery
     {
         public MurderMystery Plugin => MurderMystery.Singleton;
         public GamemodeManager GamemodeManager => MurderMystery.GamemodeManager;
-        public CoroutineManager CoroutineManager => MurderMystery.CoroutineManager;
         internal EventHandlers() { }
 
         /// Primary Events
@@ -26,47 +25,44 @@ namespace MurderMystery
         {
             Log.Debug("WaitingForPlayers Primary Event called.", Plugin.Debug);
 
-            GamemodeManager.WaitingForPlayers = true;
-            GamemodeManager.EnableSecondary();
+            MurderMystery.GamemodeManager.WaitingForPlayers = true;
+            MurderMystery.GamemodeManager.EnableSecondary();
         }
         internal void RoundStarted()
         {
             Log.Debug("RoundStarted Primary Event called.", Plugin.Debug);
 
-            if (Plugin.Config.RequireRoundRestart && !GamemodeManager.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
+            if (Plugin.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
 
             if (MMPlayer.List.Count() < 8 && !Plugin.Debug)
             {
                 Map.Broadcast(10, "<size=30>There must be atleast 8 players to start the gamemode!</size>", BroadcastFlags.Monospaced);
             }
 
-            GamemodeManager.Started = true;
+            MurderMystery.GamemodeManager.Started = true;
 
-            CoroutineManager.ServerCoroutines.RunAndAdd(SetupEvent()).RunAndAdd(MMPlayer.SetupPlayers());
+            MurderMystery.CoroutineManager.RunServerCoroutine(SetupEvent());
+            MurderMystery.CoroutineManager.RunServerCoroutine(MMPlayer.SetupPlayers());
         }
         internal void RoundEnded(RoundEndedEventArgs ev)
         {
             Log.Debug("RoundEnded Primary Event called.", Plugin.Debug);
 
-            if (!GamemodeManager.Started) { return; }
+            if (!MurderMystery.GamemodeManager.Started) { return; }
 
-            GamemodeManager.EnableSecondary(false);
+            MurderMystery.GamemodeManager.EnableSecondary(false);
 
-            CoroutineManager.ServerCoroutines.KillAll();
-            CoroutineManager.ServerCoroutines.Clear();
+            MurderMystery.CoroutineManager.Reset();
 
-            CoroutineManager.PlayerCoroutines.KillAll();
-            CoroutineManager.PlayerCoroutines.Clear();
-
-            GamemodeManager.Ended = true;
+            MurderMystery.GamemodeManager.Ended = true;
         }
         internal void RestartingRound()
         {
             Log.Debug("RestartingRound Primary Event called.", Plugin.Debug);
 
-            if (!GamemodeManager.Started) { return; }
+            if (!MurderMystery.GamemodeManager.Started) { return; }
 
-            GamemodeManager.EnableGamemode(false);
+            MurderMystery.GamemodeManager.EnableGamemode(false);
         }
 
         // Secondary Events
@@ -75,16 +71,16 @@ namespace MurderMystery
             MMPlayer ply = MMPlayer.Get(ev.Player);
 
             // Send the player a message showing the gamemode is enabled for the current round depending on gamemode status.
-            if (GamemodeManager.Enabled && !GamemodeManager.Started)
+            if (MurderMystery.GamemodeManager.Enabled && !MurderMystery.GamemodeManager.Started)
             {
                 ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode is enabled for this round.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
             }
-            else if (GamemodeManager.Started)
+            else if (MurderMystery.GamemodeManager.Started)
             {
                 ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode is currently in progress.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
                 ply.SoftlySetRole(MMRole.Spectator);
             }
-            else if (GamemodeManager.Ended)
+            else if (MurderMystery.GamemodeManager.Ended)
             {
                 ply.Player.Broadcast(10, $"<size=30>Murder Mystery gamemode has ended.</size>\n<size=20>{MurderMystery.VersionStr}</size>");
             }
@@ -112,7 +108,7 @@ namespace MurderMystery
                 ev.IsAllowed = true;
                 Map.Broadcast(15, "<size=40><color=#7f7f7f>Draw, everyone loses!</color></size>\n<size=20>also, how did this happen?</size>");
             }
-            else if (GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted. (Command should be added later)
+            else if (MurderMystery.GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted. (Command should be added later)
             {
                 ev.IsAllowed = true;
                 Map.Broadcast(15, "<size=40><color=#ffffff>Round has been force ended by an admin.</color></size>");
@@ -132,15 +128,39 @@ namespace MurderMystery
                     killer.Player.DropItem(killer.Player.Inventory.items.FirstOrDefault(x => x.id == ItemType.KeycardNTFCommander));
                     killer.SoftlySetRole(MMRole.Innocent);
                     break;
+                case (MMRole.Detective, _):
+                    if (GetNearestDetectiveWeaponOnDeath(target.Player.ReferenceHub.characterClassManager.NetworkDeathPosition, out Pickup item))
+                    {
+                        MurderMystery.CoroutineManager.RunPickupCoroutine(DetectiveWeaponPickup(item), item);
+                    }
+                    else
+                    {
+                        Log.Error("Error finding detective weapon on his death!");
+                    }
+                    break;
             }
 
             // Set the killed player to spectator after using the role check.
             target.SoftlySetRole(MMRole.Spectator);
+
+            bool GetNearestDetectiveWeaponOnDeath(Vector3 pos, out Pickup pickup)
+            {
+                try
+                {
+                    pickup = Object.FindObjectsOfType<Pickup>().Where(x => x.ItemId == ItemType.GunCOM15 && !MurderMystery.CoroutineManager.CoroutinedPickups.Contains(x) && x.weaponMods.Barrel == 0).OrderBy(x => Vector3.Distance(x.Networkposition, pos)).First();
+                    return true;
+                }
+                catch
+                {
+                    pickup = null;
+                    return false;
+                }
+            }
         }
         internal void SpawningRagdoll(SpawningRagdollEventArgs ev)
         {
             // Edit the ragdolls name to contain the role the player was before they died.
-            ev.PlayerNickname = $"[{MMPlayer.Get(ev.Owner).Role.GetRoleAsColoredString()}] " + ev.PlayerNickname;
+            ev.PlayerNickname = $"[{MMPlayer.Get(Player.Get(ev.PlayerId)).Role.GetRoleAsColoredString()}] " + ev.PlayerNickname;
         }
         internal void PickingUpItem(PickingUpItemEventArgs ev)
         {
@@ -154,7 +174,7 @@ namespace MurderMystery
                 case (_, ItemType.KeycardNTFCommander):
                 case (_, ItemType.SCP268):
                     ev.IsAllowed = false;
-                    break;
+                    return;
                 
                 // Innocents
                 case (MMRole.Innocent, ItemType.GunCOM15):
@@ -325,6 +345,8 @@ namespace MurderMystery
         {
             while (true)
             {
+                //CheckOutOfBounds();
+
                 foreach (MMPlayer ply in MMPlayer.List.Innocents())
                 {
                     if (Vector3.Distance(ply.Player.Position, item.Networkposition) <= 1.7f)
@@ -340,10 +362,13 @@ namespace MurderMystery
                             ply.SoftlySetRole(MMRole.Detective);
                             RemoveNearestDetectiveCard();
                             ply.Player.AddItem(ItemType.KeycardNTFCommander);
-                            ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = item.durability, id = ItemType.GunCOM15, modBarrel = (int)BarrelType.None, modOther = (int)OtherType.None, modSight = (int) SightType.None });
+                            ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = item.durability, id = ItemType.GunCOM15, modBarrel = 0, modOther = 0, modSight = 0 });
+                            MurderMystery.CoroutineManager.CoroutinedPickups.Remove(item);
                             item.Delete();
 
-                            break;
+                            ply.Player.ShowHint("<b><size=25><color=#0000ff>You have picked up the detectives weapon.</color></size></b>", 5f);
+
+                            yield break;
                         }
                     }
                 }
@@ -354,8 +379,20 @@ namespace MurderMystery
             void RemoveNearestDetectiveCard()
             {
                 // Gets the nearest commander keycard to the gun being picked up and deletes it.
-                Object.FindObjectsOfType<Pickup>().Where(x => x.ItemId == ItemType.KeycardNTFCommander).OrderBy(x => Vector3.Distance(x.transform.position, item.transform.position)).First().Delete();
+                try
+                {
+                    Object.FindObjectsOfType<Pickup>().Where(x => x.ItemId == ItemType.KeycardNTFCommander).OrderBy(x => Vector3.Distance(x.transform.position, item.transform.position)).First().Delete();
+                }
+                catch
+                {
+                    return;
+                }
             }
+
+            /*void CheckOutOfBounds()
+            {
+
+            }*/
         }
     }
 }

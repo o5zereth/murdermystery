@@ -388,13 +388,13 @@
             Gets a value indicating what thrown grenades are currently being tracked.
             </summary>
         </member>
-        <member name="M:Exiled.CustomItems.API.Features.CustomGrenade.Spawn(UnityEngine.Vector3,UnityEngine.Vector3,System.Single,Exiled.API.Enums.GrenadeType,Exiled.API.Features.Player)">
+        <member name="M:Exiled.CustomItems.API.Features.CustomGrenade.Spawn(UnityEngine.Vector3,UnityEngine.Vector3,System.Single,ItemType,Exiled.API.Features.Player)">
             <summary>
             Spawns a live grenade object on the map.
             </summary>
             <param name="position">The <see cref="T:UnityEngine.Vector3"/> to spawn the grenade at.</param>
             <param name="velocity">The <see cref="T:UnityEngine.Vector3"/> directional velocity the grenade should move at.</param>
-            <param name="fusetime">The <see cref="T:System.Single"/> fuse time of the grenade.</param>
+            <param name="fuseTime">The <see cref="T:System.Single"/> fuse time of the grenade.</param>
             <param name="grenadeType">The <see cref="T:Exiled.API.Enums.GrenadeType"/> of the grenade to spawn.</param>
             <param name="player">The <see cref="T:Exiled.API.Features.Player"/> to count as the thrower of the grenade.</param>
             <returns>The <see cref="T:Grenades.Grenade"/> being spawned.</returns>
@@ -420,13 +420,6 @@
             </summary>
             <param name="grenade">The <see cref="T:UnityEngine.GameObject"/> of the grenade to check.</param>
             <returns>True if it is a custom grenade.</returns>
-        </member>
-        <member name="M:Exiled.CustomItems.API.Features.CustomGrenade.GetGrenadeType(ItemType)">
-            <summary>
-            Converts a <see cref="T:ItemType"/> into a <see cref="T:Exiled.API.Enums.GrenadeType"/>.
-            </summary>
-            <param name="type">The <see cref="T:ItemType"/> to check.</param>
-            <returns><see cref="T:Exiled.API.Enums.GrenadeType"/>.</returns>
         </member>
         <member name="T:Exiled.CustomItems.API.Features.CustomItem">
             <summary>
