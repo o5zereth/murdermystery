@@ -1566,6 +1566,13 @@
             <param name="weapon">The weapon with attachment.</param>
             <param name="type">Type of the other.</param>
         </member>
+        <member name="M:Exiled.API.Extensions.Item.GetDefaultDurability(ItemType)">
+            <summary>
+            Gets the default durability of any item.
+            </summary>
+            <param name="item">The <see cref="T:ItemType">item</see> that you want to get durability of.</param>
+            <returns>Returns the item durability.</returns>
+        </member>
         <member name="T:Exiled.API.Extensions.LiftTypeExtension">
             <summary>
             Contains an extension method to get <see cref="T:Exiled.API.Enums.ElevatorType"/> from <see cref="T:Lift"/>.

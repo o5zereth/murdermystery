@@ -411,6 +411,12 @@
             </summary>
             <param name="ev"><see cref="T:Exiled.Events.EventArgs.ThrowingGrenadeEventArgs"/>.</param>
         </member>
+        <member name="M:Exiled.CustomItems.API.Features.CustomGrenade.OnExploding(Exiled.Events.EventArgs.ExplodingGrenadeEventArgs)">
+            <summary>
+            Handles tracking exploded custom grenades.
+            </summary>
+            <param name="ev"><see cref="T:Exiled.Events.EventArgs.ExplodingGrenadeEventArgs"/>.</param>
+        </member>
         <member name="M:Exiled.CustomItems.API.Features.CustomGrenade.OnWaitingForPlayers">
             <inheritdoc/>
         </member>
@@ -1305,6 +1311,11 @@
         </member>
         <member name="M:Exiled.CustomItems.RoundHandler.OnRoundStarted">
             <inheritdoc cref="M:Exiled.Events.Handlers.Server.OnRoundStarted"/>
+        </member>
+        <member name="T:Exiled.CustomItems.Patches.ChangeIntoGrenade">
+            <summary>
+            Patches <see cref="M:Grenades.FragGrenade.ChangeIntoGrenade(Pickup)"/>.
+            </summary>
         </member>
     </members>
 </doc>

@@ -14,6 +14,7 @@ namespace MurderMystery.API
             Started = false;
             Ended = false;
             ForceRoundEnd = false;
+            RoundEndTime = -1f;
             PrimaryEventsEnabled = false;
             SecondaryEventsEnabled = false;
         }
@@ -22,6 +23,7 @@ namespace MurderMystery.API
         public bool Started { get; internal set; }
         public bool Ended { get; internal set; }
         public bool ForceRoundEnd { get; set; }
+        public float RoundEndTime { get; internal set; }
         public bool WaitingForPlayers { get; internal set; }
         public bool PrimaryEventsEnabled { get; private set; }
         public bool SecondaryEventsEnabled { get; private set; }
@@ -54,6 +56,8 @@ namespace MurderMystery.API
                 Enabled = false;
                 Ended = false;
                 Started = false;
+                ForceRoundEnd = false;
+                RoundEndTime = -1f;
                 WaitingForPlayers = false;
             }
         }

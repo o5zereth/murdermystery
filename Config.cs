@@ -12,6 +12,7 @@ namespace MurderMystery
         public float MurdererPercent { get; set; } = 1f / 6f;
         public float DetectivePercent { get; set; } = 1f / 12f;
         public float EquipmentTime { get; set; } = 60f;
+        public float RoundTime { get; set; } = 600f;
 
         internal static void Validate(Config cfg)
         {

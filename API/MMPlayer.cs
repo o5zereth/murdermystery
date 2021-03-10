@@ -16,10 +16,12 @@ namespace MurderMystery.API
         {
             Player = player;
             Role = MMRole.None;
+            DetectiveGunLossCooldown = -1f;
         }
 
         public Player Player { get; }
         public MMRole Role { get; private set; }
+        public float DetectiveGunLossCooldown { get; private set; }
 
         internal void SoftlySetRole(MMRole role)
         {
@@ -138,6 +140,18 @@ namespace MurderMystery.API
                         continue;
                 }
             }
+        }
+        internal IEnumerator<float> DetectiveGunLossTimer(float waitTime)
+        {
+            DetectiveGunLossCooldown = waitTime;
+
+            while (DetectiveGunLossCooldown > 0f)
+            {
+                yield return Timing.WaitForSeconds(0.1f);
+                DetectiveGunLossCooldown -= 0.1f;
+            }
+
+            yield break;
         }
 
         internal static void BroadcastRoleInfo(MMPlayer ply)

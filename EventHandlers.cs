@@ -17,7 +17,6 @@ namespace MurderMystery
     public class EventHandlers
     {
         public MurderMystery Plugin => MurderMystery.Singleton;
-        public GamemodeManager GamemodeManager => MurderMystery.GamemodeManager;
         internal EventHandlers() { }
 
         /// Primary Events
@@ -37,12 +36,15 @@ namespace MurderMystery
             if (MMPlayer.List.Count() < 8 && !Plugin.Debug)
             {
                 Map.Broadcast(10, "<size=30>There must be atleast 8 players to start the gamemode!</size>", BroadcastFlags.Monospaced);
+                MurderMystery.GamemodeManager.EnableGamemode(false);
+                return;
             }
 
             MurderMystery.GamemodeManager.Started = true;
 
             MurderMystery.CoroutineManager.RunServerCoroutine(SetupEvent());
             MurderMystery.CoroutineManager.RunServerCoroutine(MMPlayer.SetupPlayers());
+            MurderMystery.CoroutineManager.RunServerCoroutine(RoundTimer(MurderMystery.Singleton.Config.RoundTime));
         }
         internal void RoundEnded(RoundEndedEventArgs ev)
         {
@@ -93,25 +95,35 @@ namespace MurderMystery
             if (Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
 
             // Check the remaining roles to determine if the game should end.
-            if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0)
+            if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no murderers left.
             {
                 ev.IsAllowed = true;
-                Map.Broadcast(15, "<size=40><color=#00ff00>Innocents won!</color></size>");
+                Map.ClearBroadcasts();
+                Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>All murderers have been defeated.</size>");
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() > 0)
+            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() > 0) // End the gamemode if there are no innocents or detectives left.
             {
                 ev.IsAllowed = true;
-                Map.Broadcast(15, "<size=40><color=#ff0000>Murderers won!</color></size>");
+                Map.ClearBroadcasts();
+                Map.Broadcast(30, "\n<size=80><color=#ff0000><b>Murderers win</b></color></size>\n<size=30>All innocents have been defeated.</size>");
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0)
+            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no roles left alive.
             {
                 ev.IsAllowed = true;
-                Map.Broadcast(15, "<size=40><color=#7f7f7f>Draw, everyone loses!</color></size>\n<size=20>also, how did this happen?</size>");
+                Map.ClearBroadcasts();
+                Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>All players have been killed.</size>");
             }
             else if (MurderMystery.GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted. (Command should be added later)
             {
                 ev.IsAllowed = true;
-                Map.Broadcast(15, "<size=40><color=#ffffff>Round has been force ended by an admin.</color></size>");
+                Map.ClearBroadcasts();
+                Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>Round was force ended by an administrator.</size>");
+            }
+            else if (MurderMystery.GamemodeManager.RoundEndTime <= 0f) // End the gamemode if the murderers run out of time.
+            {
+                ev.IsAllowed = true;
+                Map.ClearBroadcasts();
+                Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>Murderers ran out of time and lost.</size>");
             }
         }
         internal void Died(DiedEventArgs ev)
@@ -119,19 +131,27 @@ namespace MurderMystery
             MMPlayer target = MMPlayer.Get(ev.Target);
             MMPlayer killer = MMPlayer.Get(ev.Killer);
 
-            // If the detective killed an innocent, respond accordingly.
             switch (target.Role, killer.Role)
             {
                 case (MMRole.Innocent, MMRole.Detective):
-                    killer.Player.EnableEffect<Blinded>(15);
+                    killer.Player.EnableEffect<Blinded>(30);
                     killer.Player.DropItem(killer.Player.Inventory.items.FirstOrDefault(x => x.id == ItemType.GunCOM15));
                     killer.Player.DropItem(killer.Player.Inventory.items.FirstOrDefault(x => x.id == ItemType.KeycardNTFCommander));
+                    MurderMystery.CoroutineManager.RunPlayerCoroutine(killer.DetectiveGunLossTimer(30f), killer);
                     killer.SoftlySetRole(MMRole.Innocent);
-                    break;
-                case (MMRole.Detective, _):
-                    if (GetNearestDetectiveWeaponOnDeath(target.Player.ReferenceHub.characterClassManager.NetworkDeathPosition, out Pickup item))
+                    if (GetNearestDetectiveWeapon(killer.Player.Position, out Pickup item))
                     {
                         MurderMystery.CoroutineManager.RunPickupCoroutine(DetectiveWeaponPickup(item), item);
+                    }
+                    else
+                    {
+                        Log.Error("Error finding detective weapon on losing his weapon!");
+                    }
+                    break;
+                case (MMRole.Detective, _):
+                    if (GetNearestDetectiveWeapon(target.Player.ReferenceHub.characterClassManager.NetworkDeathPosition, out Pickup item2))
+                    {
+                        MurderMystery.CoroutineManager.RunPickupCoroutine(DetectiveWeaponPickup(item2), item2);
                     }
                     else
                     {
@@ -143,7 +163,7 @@ namespace MurderMystery
             // Set the killed player to spectator after using the role check.
             target.SoftlySetRole(MMRole.Spectator);
 
-            bool GetNearestDetectiveWeaponOnDeath(Vector3 pos, out Pickup pickup)
+            bool GetNearestDetectiveWeapon(Vector3 pos, out Pickup pickup)
             {
                 try
                 {
@@ -250,8 +270,11 @@ namespace MurderMystery
         }
         internal void InteractingLocker(InteractingLockerEventArgs ev)
         {
-            // Don't allow locker interaction.
-            ev.IsAllowed = false;
+            // Don't allow locker interaction unless it is a medkit locker.
+            if (ev.Chamber.name != "Medkit")
+            {
+                ev.IsAllowed = false;
+            }
         }
         internal void Shooting(ShootingEventArgs ev)
         {
@@ -359,16 +382,19 @@ namespace MurderMystery
                         }
                         else
                         {
-                            ply.SoftlySetRole(MMRole.Detective);
-                            RemoveNearestDetectiveCard();
-                            ply.Player.AddItem(ItemType.KeycardNTFCommander);
-                            ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = item.durability, id = ItemType.GunCOM15, modBarrel = 0, modOther = 0, modSight = 0 });
-                            MurderMystery.CoroutineManager.CoroutinedPickups.Remove(item);
-                            item.Delete();
+                            if (ply.DetectiveGunLossCooldown <= 0f)
+                            {
+                                ply.SoftlySetRole(MMRole.Detective);
+                                RemoveNearestDetectiveCard();
+                                ply.Player.AddItem(ItemType.KeycardNTFCommander);
+                                ply.Player.AddItem(new Inventory.SyncItemInfo() { durability = item.durability, id = ItemType.GunCOM15, modBarrel = 0, modOther = 0, modSight = 0 });
+                                MurderMystery.CoroutineManager.CoroutinedPickups.Remove(item);
+                                item.Delete();
 
-                            ply.Player.ShowHint("<b><size=25><color=#0000ff>You have picked up the detectives weapon.</color></size></b>", 5f);
+                                ply.Player.ShowHint("<b><size=25><color=#0000ff>You have picked up the detectives weapon.</color></size></b>", 5f);
 
-                            yield break;
+                                yield break;
+                            }
                         }
                     }
                 }
@@ -393,6 +419,16 @@ namespace MurderMystery
             {
 
             }*/
+        }
+        internal IEnumerator<float> RoundTimer(float roundTime)
+        {
+            MurderMystery.GamemodeManager.RoundEndTime = roundTime;
+
+            while (true)
+            {
+                yield return Timing.WaitForSeconds(0.1f);
+                MurderMystery.GamemodeManager.RoundEndTime -= 0.1f;
+            }
         }
     }
 }
