@@ -4,7 +4,7 @@ using System;
 
 namespace MurderMystery.Commands
 {
-    class Enable : ICommand
+    public class Enable : ICommand
     {
         public string Command { get; } = "enable";
 

@@ -370,8 +370,13 @@ namespace MurderMystery
             {
                 //CheckOutOfBounds();
 
-                foreach (MMPlayer ply in MMPlayer.List.Innocents())
+                foreach (MMPlayer ply in MMPlayer.List)
                 {
+                    if (ply.Role != MMRole.Innocent || ply.Player.Role == RoleType.Spectator)
+                    {
+                        continue;
+                    }
+
                     if (Vector3.Distance(ply.Player.Position, item.Networkposition) <= 1.7f)
                     {
                         // MAKE RAYCAST CHECK TO MAKE SURE THEY DONT GRAB IT THROUGH WALLS. (dunno how tf to do it so for now i leave it, :troll: will come back to later)
