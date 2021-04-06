@@ -14,7 +14,7 @@ namespace MurderMystery.Commands
 
         public string[] Aliases { get; } = { "players", "plys" };
 
-        public string Description { get; } = "Enables the gamemode.";
+        public string Description { get; } = "Views all players and their roles when the gamemode is active.";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -46,19 +46,19 @@ namespace MurderMystery.Commands
             }
             for (int i = 0; i < Spectators.Count; i++)
             {
-                stringBuilder.Append($"\n<size=25>[{MMRole.Spectator.GetRoleAsColoredString()}] {Nones[i].Player.Nickname} ({Nones[i].Player.Id})</size>");
+                stringBuilder.Append($"\n<size=25>[{MMRole.Spectator.GetRoleAsColoredString()}] {Spectators[i].Player.Nickname} ({Spectators[i].Player.Id})</size>");
             }
             for (int i = 0; i < Innocents.Count; i++)
             {
-                stringBuilder.Append($"\n<size=25>[{MMRole.Innocent.GetRoleAsColoredString()}] {Nones[i].Player.Nickname} ({Nones[i].Player.Id})</size>");
+                stringBuilder.Append($"\n<size=25>[{MMRole.Innocent.GetRoleAsColoredString()}] {Innocents[i].Player.Nickname} ({Innocents[i].Player.Id})</size>");
             }
             for (int i = 0; i < Murderers.Count; i++)
             {
-                stringBuilder.Append($"\n<size=25>[{MMRole.Murderer.GetRoleAsColoredString()}] {Nones[i].Player.Nickname} ({Nones[i].Player.Id})</size>");
+                stringBuilder.Append($"\n<size=25>[{MMRole.Murderer.GetRoleAsColoredString()}] {Murderers[i].Player.Nickname} ({Murderers[i].Player.Id})</size>");
             }
             for (int i = 0; i < Detectives.Count; i++)
             {
-                stringBuilder.Append($"\n<size=25>[{MMRole.Detective.GetRoleAsColoredString()}] {Nones[i].Player.Nickname} ({Nones[i].Player.Id})</size>");
+                stringBuilder.Append($"\n<size=25>[{MMRole.Detective.GetRoleAsColoredString()}] {Detectives[i].Player.Nickname} ({Detectives[i].Player.Id})</size>");
             }
 
             response = stringBuilder.ToString();

@@ -28,6 +28,8 @@ namespace MurderMystery.API
             {
                 Harmony.UnpatchAll();
 
+                MurderMystery.CoroutineManager.Reset();
+
                 ServerConsole.FriendlyFire = ConfigFile.ServerConfig.GetBool("friendly_fire");
                 CharacterClassManager.LaterJoinEnabled = ConfigFile.ServerConfig.GetBool("later_join_enabled", true);
             }

@@ -20,6 +20,7 @@ namespace MurderMystery.Commands
             RegisterCommand(new Enable());
             RegisterCommand(new Disable());
             RegisterCommand(new Abandon());
+            RegisterCommand(new ViewPlayers());
         }
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
