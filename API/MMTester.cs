@@ -1,10 +1,6 @@
-﻿using Exiled.API.Features;
-using Interactables.Interobjects.DoorUtils;
-using UnityEngine;
-
-namespace MurderMystery.API
+﻿namespace MurderMystery.API
 {
-    public class MMTester
+    /*public class MMTester
     {
         internal MMTester()
         {
@@ -44,7 +40,7 @@ namespace MurderMystery.API
             }
             else
             {
-                Log.Error("(MMTester ctor) Major error! HczArmory was null, the tester will not work!");
+                Log.Error("(MMTester) Major error! HczArmory was null, the tester will not work!");
 
                 Singleton = null;
             }
@@ -71,5 +67,5 @@ namespace MurderMystery.API
         {
             return (pos.x >= X.x) && (pos.x <= X.y) && (pos.y >= Y.x) && (pos.y <= Y.y) && (pos.z >= Z.x) && (pos.z <= Z.y);
         }
-    }
+    }*/
 }

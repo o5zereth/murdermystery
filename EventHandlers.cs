@@ -1,39 +1,38 @@
-﻿using Exiled.API.Features;
-using MEC;
-using Exiled.Events.EventArgs;
-using System.Linq;
-using System.Collections.Generic;
-using MurderMystery.Extensions;
-using Interactables.Interobjects.DoorUtils;
-using CustomPlayerEffects;
+﻿using CustomPlayerEffects;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
-using static Broadcast;
-using UnityEngine;
+using Exiled.API.Features;
+using Exiled.Events.EventArgs;
+using Interactables.Interobjects.DoorUtils;
+using MEC;
 using MurderMystery.API;
+using MurderMystery.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using static Broadcast;
 
 namespace MurderMystery
 {
     public class EventHandlers
     {
-        public MurderMystery Plugin => MurderMystery.Singleton;
         internal EventHandlers() { }
 
         /// Primary Events
         internal void WaitingForPlayers()
         {
-            Log.Debug("WaitingForPlayers Primary Event called.", Plugin.Debug);
+            Log.Debug("WaitingForPlayers Primary Event called.", MurderMystery.Singleton.Debug);
 
             MurderMystery.GamemodeManager.WaitingForPlayers = true;
             MurderMystery.GamemodeManager.EnableSecondary();
         }
         internal void RoundStarted()
         {
-            Log.Debug("RoundStarted Primary Event called.", Plugin.Debug);
+            Log.Debug("RoundStarted Primary Event called.", MurderMystery.Singleton.Debug);
 
-            if (Plugin.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
+            if (MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", MurderMystery.Singleton.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
 
-            if (MMPlayer.List.Count() < 8 && !Plugin.Debug)
+            if (MMPlayer.List.Count < 8 && !MurderMystery.Singleton.Debug)
             {
                 Map.Broadcast(10, "<size=30>There must be atleast 8 players to start the gamemode!</size>", BroadcastFlags.Monospaced);
                 MurderMystery.GamemodeManager.EnableGamemode(false);
@@ -48,7 +47,7 @@ namespace MurderMystery
         }
         internal void RoundEnded(RoundEndedEventArgs ev)
         {
-            Log.Debug("RoundEnded Primary Event called.", Plugin.Debug);
+            Log.Debug("RoundEnded Primary Event called.", MurderMystery.Singleton.Debug);
 
             if (!MurderMystery.GamemodeManager.Started) { return; }
 
@@ -60,7 +59,7 @@ namespace MurderMystery
         }
         internal void RestartingRound()
         {
-            Log.Debug("RestartingRound Primary Event called.", Plugin.Debug);
+            Log.Debug("RestartingRound Primary Event called.", MurderMystery.Singleton.Debug);
 
             if (!MurderMystery.GamemodeManager.Started) { return; }
 
@@ -89,42 +88,44 @@ namespace MurderMystery
         }
         internal void EndingRound(EndingRoundEventArgs ev)
         {
-            ev.IsAllowed = false;
+            ev.IsAllowed = true;
 
             // Make sure the round doesn't end before setting everyones roles.
             if (Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
 
             // Check the remaining roles to determine if the game should end.
-            if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no murderers left.
+            if (MMPlayer.List.InnocentsCount() + MMPlayer.List.DetectivesCount() > 0 && MMPlayer.List.MurderersCount() == 0) // End the gamemode if there are no murderers left.
             {
-                ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>All murderers have been defeated.</size>");
+                return;
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() > 0) // End the gamemode if there are no innocents or detectives left.
+            if (MMPlayer.List.InnocentsCount() + MMPlayer.List.DetectivesCount() == 0 && MMPlayer.List.MurderersCount() > 0) // End the gamemode if there are no innocents or detectives left.
             {
-                ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#ff0000><b>Murderers win</b></color></size>\n<size=30>All innocents have been defeated.</size>");
+                return;
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no roles left alive.
+            if (MMPlayer.List.InnocentsCount() + MMPlayer.List.DetectivesCount() == 0 && MMPlayer.List.MurderersCount() == 0) // End the gamemode if there are no roles left alive.
             {
-                ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>All players have been killed.</size>");
+                return;
             }
-            else if (MurderMystery.GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted. (Command should be added later)
+            if (MurderMystery.GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted.
             {
-                ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>Round was force ended by an administrator.</size>");
+                return;
             }
-            else if (MurderMystery.GamemodeManager.RoundEndTime <= 0f) // End the gamemode if the murderers run out of time.
+            if (MurderMystery.GamemodeManager.RoundEndTime <= 0f) // End the gamemode if the murderers run out of time.
             {
-                ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>Murderers ran out of time and lost.</size>");
+                return;
             }
+
+            ev.IsAllowed = false;
         }
         internal void Died(DiedEventArgs ev)
         {
@@ -276,6 +277,11 @@ namespace MurderMystery
                 ev.IsAllowed = false;
             }
         }
+        internal void OpeningGenerator(OpeningGeneratorEventArgs ev)
+        {
+            // Don't allow opening generators.
+            ev.IsAllowed = false;
+        }
         internal void Shooting(ShootingEventArgs ev)
         {
             MMPlayer shooter = MMPlayer.Get(ev.Shooter);
@@ -314,34 +320,82 @@ namespace MurderMystery
             // Don't allow femur breaker usage.
             ev.IsAllowed = false;
         }
+        internal void ChangingRole(ChangingRoleEventArgs ev)
+        {
+            MMPlayer ply = MMPlayer.Get(ev.Player);
+
+            Timing.CallDelayed(1f, () =>
+            {
+                if (ev.NewRole == RoleType.Spectator && ply.Role != MMRole.Spectator)
+                {
+                    ply.SoftlySetRole(MMRole.Spectator);
+                }
+                else if (ply.Role != MMRole.Spectator)
+                {
+                    if (ev.NewRole == RoleType.ClassD && Round.ElapsedTime.TotalMilliseconds <= 5000)
+                    {
+                        return;
+                    }
+
+                    ply.SoftlySetRole(MMRole.Spectator);
+                    ply.Player.Broadcast(15, "<size=30>Your role has been set to spectator due to a role change,\nif this is unexpected then please contact the developer.</size>");
+                }
+            });
+        }
 
         // Coroutines
         internal IEnumerator<float> SetupEvent()
         {
             Log.Debug("SetupEvent called.", MurderMystery.Singleton.Debug);
 
-            // Update doors to allow access to all rooms in HCZ.
+            // Update doors to lock most rooms in HCZ.
             for (int i = 0; i < Map.Doors.Count; i++)
             {
-                switch (Map.Doors[i].RequiredPermissions.RequiredPermissions)
+                switch (Map.Doors[i].RequiredPermissions.RequiredPermissions, Map.Doors[i].GetNametag())
                 {
-                    case KeycardPermissions.None:
+                    // No permssion doors.
+                    case (KeycardPermissions.None, _):
                         continue;
-                    case KeycardPermissions.Checkpoints:
+                    // Checkpoints.
+                    case (KeycardPermissions.Checkpoints, _):
                         Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
                         Map.Doors[i].NetworkTargetState = false;
                         continue;
+
+                    // Tagged doors.
+                    case (_, "HCZ_ARMORY"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+                    case (_, "049_ARMORY"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+                    case (_, "096"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+                    /*case (_, "106_PRIMARY"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+                    case (_, "106_SECONDARY"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+                    case (_, "106_BOTTOM"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;*/
+                    case (_, "HID"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;
+
+                    // Any other door.
                     default:
-                        if (Map.Doors[i].GetNametag() == "106_PRIMARY" || Map.Doors[i].GetNametag() == "106_SECONDARY" || Map.Doors[i].GetNametag() == "106_BOTTOM")
-                        {
-                            Map.Doors[i].ServerChangeLock(DoorLockReason.Warhead, true);
-                            Map.Doors[i].NetworkTargetState = true;
-                        }
-                        else
-                        {
-                            Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
-                            Map.Doors[i].NetworkTargetState = true;
-                        }
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = true;
                         continue;
                 }
             }
@@ -356,12 +410,9 @@ namespace MurderMystery
             }
 
             // Lock elevators to light containment to prevent access.
-            foreach (Lift lift in Map.Lifts)
+            for (int i = 0; i < Map.Lifts.Count; i++)
             {
-                if (lift.Type() == ElevatorType.LczA || lift.Type() == ElevatorType.LczB)
-                {
-                    lift.Network_locked = true;
-                }
+                Map.Lifts[i].Network_locked = true;
             }
         }
         internal IEnumerator<float> DetectiveWeaponPickup(Pickup item)
@@ -431,8 +482,8 @@ namespace MurderMystery
 
             while (true)
             {
-                yield return Timing.WaitForSeconds(0.1f);
-                MurderMystery.GamemodeManager.RoundEndTime -= 0.1f;
+                yield return Timing.WaitForSeconds(1f);
+                MurderMystery.GamemodeManager.RoundEndTime -= 1f;
             }
         }
     }

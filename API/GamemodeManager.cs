@@ -1,7 +1,4 @@
 ﻿using Exiled.API.Features;
-using MEC;
-using MurderMystery.Extensions;
-using System.Collections.Generic;
 using Handlers = Exiled.Events.Handlers;
 
 namespace MurderMystery.API
@@ -10,6 +7,7 @@ namespace MurderMystery.API
     {
         internal GamemodeManager()
         {
+            Log.Debug("[GamemodeManager] Initializing...", MurderMystery.Singleton.DebugVERBOSE);
             Enabled = false;
             Started = false;
             Ended = false;
@@ -19,14 +17,135 @@ namespace MurderMystery.API
             SecondaryEventsEnabled = false;
         }
 
-        public bool Enabled { get; private set; }
-        public bool Started { get; internal set; }
-        public bool Ended { get; internal set; }
-        public bool ForceRoundEnd { get; set; }
-        public float RoundEndTime { get; internal set; }
-        public bool WaitingForPlayers { get; internal set; }
-        public bool PrimaryEventsEnabled { get; private set; }
-        public bool SecondaryEventsEnabled { get; private set; }
+        public bool Enabled
+        { 
+            get
+            {
+                return _enabled;
+            }
+            set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting Enabled to {value}.");
+                }
+                _enabled = value;
+            }
+        }
+        public bool Started
+        {
+            get
+            {
+                return _started;
+            }
+            internal set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting Started to {value}.");
+                }
+                _started = value;
+            }
+        }
+        public bool Ended
+        {
+            get
+            {
+                return _ended;
+            }
+            internal set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting Ended to {value}.");
+                }
+                _ended = value;
+            }
+        }
+        public bool ForceRoundEnd
+        {
+            get
+            {
+                return _forceRoundEnd;
+            }
+            internal set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting ForceRoundEnd to {value}.");
+                }
+                _forceRoundEnd = value;
+            }
+        }
+        public float RoundEndTime
+        {
+            get
+            {
+                return _roundEndTime;
+            }
+            internal set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE && (value <= 0f || value == MurderMystery.Singleton.Config.RoundTime)) // Prevents spamming for the entire time and shows times that are seen as "important".
+                {
+                    Log.Debug($"[GamemodeManager] Setting RoundEndTime to {value}.");
+                }
+                _roundEndTime = value;
+            }
+        }
+        public bool WaitingForPlayers
+        {
+            get
+            {
+                return _waitingForPlayers;
+            }
+            internal set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting WaitingForPlayers to {value}.");
+                }
+                _waitingForPlayers = value;
+            }
+        }
+        public bool PrimaryEventsEnabled
+        {
+            get
+            {
+                return _primaryEventsEnabled;
+            }
+            private set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting PrimaryEventsEnabled to {value}.");
+                }
+                _primaryEventsEnabled = value;
+            }
+        }
+        public bool SecondaryEventsEnabled
+        {
+            get
+            {
+                return _secondaryEventsEnabled;
+            }
+            private set
+            {
+                if (MurderMystery.Singleton.DebugVERBOSE)
+                {
+                    Log.Debug($"[GamemodeManager] Setting SecondaryEventsEnabled to {value}.");
+                }
+                _secondaryEventsEnabled = value;
+            }
+        }
+
+        private bool _enabled;
+        private bool _started;
+        private bool _ended;
+        private bool _forceRoundEnd;
+        private float _roundEndTime;
+        private bool _waitingForPlayers;
+        private bool _primaryEventsEnabled;
+        private bool _secondaryEventsEnabled;
 
         internal void EnableGamemode(bool enable = true)
         {
@@ -103,10 +222,14 @@ namespace MurderMystery.API
                 Handlers.Player.PickingUpItem += MurderMystery.EventHandlers.PickingUpItem;
                 Handlers.Player.DroppingItem += MurderMystery.EventHandlers.DroppingItem;
                 Handlers.Player.InteractingLocker += MurderMystery.EventHandlers.InteractingLocker;
+                Handlers.Player.OpeningGenerator += MurderMystery.EventHandlers.OpeningGenerator;
                 Handlers.Player.Shooting += MurderMystery.EventHandlers.Shooting;
                 Handlers.Player.TriggeringTesla += MurderMystery.EventHandlers.TriggeringTesla;
                 Handlers.Server.RespawningTeam += MurderMystery.EventHandlers.RespawningTeam;
                 Handlers.Player.EnteringFemurBreaker += MurderMystery.EventHandlers.EnteringFemurBreaker;
+                Handlers.Player.ChangingRole += MurderMystery.EventHandlers.ChangingRole;
+
+                MurderMystery.CompatabilityManager.TogglingSecondaryEvents(true);
 
                 SecondaryEventsEnabled = true;
             }
@@ -121,10 +244,14 @@ namespace MurderMystery.API
                 Handlers.Player.PickingUpItem -= MurderMystery.EventHandlers.PickingUpItem;
                 Handlers.Player.DroppingItem -= MurderMystery.EventHandlers.DroppingItem;
                 Handlers.Player.InteractingLocker -= MurderMystery.EventHandlers.InteractingLocker;
+                Handlers.Player.OpeningGenerator -= MurderMystery.EventHandlers.OpeningGenerator;
                 Handlers.Player.Shooting -= MurderMystery.EventHandlers.Shooting;
                 Handlers.Player.TriggeringTesla -= MurderMystery.EventHandlers.TriggeringTesla;
                 Handlers.Server.RespawningTeam -= MurderMystery.EventHandlers.RespawningTeam;
                 Handlers.Player.EnteringFemurBreaker -= MurderMystery.EventHandlers.EnteringFemurBreaker;
+                Handlers.Player.ChangingRole -= MurderMystery.EventHandlers.ChangingRole;
+
+                MurderMystery.CompatabilityManager.TogglingSecondaryEvents(false);
 
                 SecondaryEventsEnabled = false;
             }

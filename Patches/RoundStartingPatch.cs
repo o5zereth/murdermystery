@@ -1,5 +1,5 @@
-﻿using HarmonyLib;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
+using HarmonyLib;
 using MurderMystery.API;
 
 namespace MurderMystery.Patches
@@ -9,16 +9,14 @@ namespace MurderMystery.Patches
     {
         private static bool Prefix(CharacterClassManager __instance)
         {
-            if ((MurderMystery.Singleton.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) || !MurderMystery.GamemodeManager.Enabled) { return true; }
-
             Log.Debug("RoundStarting prefix patch has been called.", MurderMystery.Singleton.Debug);
 
-            foreach (MMPlayer ply in MMPlayer.List)
+            for (int i = 0; i < MMPlayer.List.Count; i++)
             {
-                if (ply.Player.IsOverwatchEnabled)
+                if (MMPlayer.List[i].Player.IsOverwatchEnabled)
                 {
-                    Log.Debug($"Player: {ply.Player.Nickname} is being set to spectator because of overwatch.", MurderMystery.Singleton.Debug);
-                    ply.SoftlySetRole(MMRole.Spectator);
+                    Log.Debug($"Player: {MMPlayer.List[i].Player.Nickname} is being set to spectator because of overwatch.", MurderMystery.Singleton.Debug);
+                    MMPlayer.List[i].SoftlySetRole(MMRole.Spectator);
                 }
             }
 

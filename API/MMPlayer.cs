@@ -1,11 +1,11 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using MEC;
 using MurderMystery.Extensions;
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using MEC;
-using Exiled.API.Enums;
+using System.Linq;
 using System.Text;
 
 namespace MurderMystery.API
@@ -17,6 +17,8 @@ namespace MurderMystery.API
             Player = player;
             Role = MMRole.None;
             DetectiveGunLossCooldown = -1f;
+
+            List.Add(this);
         }
 
         public Player Player { get; }
@@ -28,13 +30,19 @@ namespace MurderMystery.API
             Role = role;
         }
 
-        public static IEnumerable<MMPlayer> List => Dictionary.Values;
-
-        private static Dictionary<Player, MMPlayer> Dictionary { get; set; } = new Dictionary<Player, MMPlayer>();
+        public static List<MMPlayer> List { get; private set; } = new List<MMPlayer>();
 
         public static MMPlayer Get(Player player)
         {
-            return Dictionary.TryGetValue(player, out MMPlayer ply) ? ply : null;
+            for (int i = 0; i < List.Count; i++)
+            {
+                if (List[i].Player == player)
+                {
+                    return List[i];
+                }
+            }
+
+            return null;
         }
 
         // Coroutines
@@ -44,73 +52,75 @@ namespace MurderMystery.API
 
             yield return Timing.WaitForSeconds(0.2f);
 
-            foreach (MMPlayer ply in List.Nones())
+            List<MMPlayer> Nones = List.Nones();
+            for (int i = 0; i < Nones.Count; i++)
             {
-                Log.Debug("Player found in list without a role, setting to innocent.", MurderMystery.Singleton.Debug);
-                ply.Role = MMRole.Innocent;
+                Log.Debug("Player found in list without a role, setting to innocent for role calculation...", MurderMystery.Singleton.Debug);
+                Nones[i].Role = MMRole.Innocent;
             }
 
-            CalculateRoleCounts(List.Innocents().Count(), out int m, out int d);
+            CalculateRoleCounts(List.InnocentsCount(), out int m, out int d);
 
-            while (List.Murderers().Count() < m || List.Detectives().Count() < d)
+            while (List.MurderersCount() < m || List.DetectivesCount() < d)
             {
-                if (List.Murderers().Count() < m)
+                if (List.MurderersCount() < m)
                 {
                     Random rng = new Random();
 
-                    int r = rng.Next(List.Innocents().Count());
-                    List.Innocents().ToArray()[r].Role = MMRole.Murderer;
+                    int r = rng.Next(List.InnocentsCount());
+                    List.Innocents()[r].Role = MMRole.Murderer;
                 }
-                if (List.Detectives().Count() < d)
+                if (List.DetectivesCount() < d)
                 {
                     Random rng = new Random();
 
-                    int r = rng.Next(List.Innocents().Count());
-                    List.Innocents().ToArray()[r].Role = MMRole.Detective;
+                    int r = rng.Next(List.InnocentsCount());
+                    List.Innocents()[r].Role = MMRole.Detective;
                 }
             }
 
             if (MurderMystery.Singleton.Debug)
             {
-                foreach (MMPlayer ply in List.Nones())
+                for (int i = 0; i < List.Count; i++)
                 {
-                    Log.Error($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a NONE. (An error occured.)");
-                }
-                foreach (MMPlayer ply in List.Spectators())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a spectator. (In overwatch mode.)");
-                }
-                foreach (MMPlayer ply in List.Innocents())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as an innocent.");
-                }
-                foreach (MMPlayer ply in List.Murderers())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a murderer.");
-                }
-                foreach (MMPlayer ply in List.Detectives())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a detective.");
+                    switch (List[i].Role)
+                    {
+                        case MMRole.None:
+                            Log.Error($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a NONE. (An error occured.)");
+                            continue;
+                        case MMRole.Spectator:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a spectator. (In overwatch mode.)");
+                            continue;
+                        case MMRole.Innocent:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as an innocent.");
+                            continue;
+                        case MMRole.Murderer:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a murderer.");
+                            continue;
+                        case MMRole.Detective:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a detective.");
+                            continue;
+                    }
                 }
             }
 
-            foreach (MMPlayer ply in List)
+            for (int i = 0; i < List.Count; i++)
             {
-                if (ply.IsAlive())
+                if (List[i].IsAlive())
                 {
-                    ply.Player.SetRole(RoleType.ClassD);
-                    Timing.CallDelayed(0.2f, () =>
+                    List[i].Player.SetRole(RoleType.ClassD);
+                    Timing.CallDelayed(0.5f, () =>
                     {
-                        ply.Player.Position = RoleType.Scp049.GetRandomSpawnPoint();
-                        ply.Player.AddItem(ItemType.Painkillers);
-                        ply.Player.Ammo[(int)AmmoType.Nato9] = int.MaxValue;
-                        BroadcastRoleInfo(ply);
+                        List[i].Player.Position = RoleType.Scp049.GetRandomSpawnPoint();
+                        List[i].Player.AddItem(ItemType.Painkillers);
+                        List[i].Player.Ammo[(int)AmmoType.Nato9] = int.MaxValue;
+                        BroadcastRoleInfo(List[i]);
                     });
                 }
                 else
                 {
-                    ply.Player.SetRole(RoleType.Spectator);
-                    BroadcastRoleInfo(ply);
+                    List[i].Player.SetRole(RoleType.Spectator);
+                    BroadcastRoleInfo(List[i]);
                 }
             }
 
@@ -252,17 +262,19 @@ namespace MurderMystery.API
         internal static void Add(VerifiedEventArgs ev)
         {
             Log.Debug("Player added to list.", MurderMystery.Singleton.Debug);
-            Dictionary.Add(ev.Player, new MMPlayer(ev.Player));
+            new MMPlayer(ev.Player);
         }
         internal static void Remove(DestroyingEventArgs ev)
         {
             Log.Debug("Player removed from list.", MurderMystery.Singleton.Debug);
-            Dictionary.Remove(ev.Player);
+            List.Remove(Get(ev.Player));
         }
+
+        [Obsolete("Removed because exiled has fixed their stuff, will re-add if any issues occur.", true)]
         internal static void RemoveAll()
         {
-            Log.Debug("CLearing all players from list.", MurderMystery.Singleton.Debug);
-            Dictionary.Clear();
+            Log.Debug("Clearing all players from list.", MurderMystery.Singleton.Debug);
+            List.Clear();
         }
     }
 }

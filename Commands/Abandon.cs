@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using System;
 
@@ -26,8 +27,16 @@ namespace MurderMystery.Commands
                 return false;
             }
 
+            if (MurderMystery.GamemodeManager.ForceRoundEnd)
+            {
+                Log.Debug("ForceRoundEnd command is being used twice, this may cause unexpected behavior!");
+                MurderMystery.GamemodeManager.EnableSecondary(false);
+                response = "Attempting to disable the event mid-round... (Note: This is a last resort to forcefully end the gamemode.)";
+                return true;
+            }
+
             MurderMystery.GamemodeManager.ForceRoundEnd = true;
-            response = $"The murder mystery gamemode has been forcefully ended.";
+            response = $"The murder mystery gamemode should be forcefully ended.\n(Ensure that roundlock is disabled.)\n[If this fails and roundlock is disabled, use the command again.]";
             return true;
         }
     }
