@@ -17,8 +17,6 @@ namespace MurderMystery.API
             Player = player;
             Role = MMRole.None;
             DetectiveGunLossCooldown = -1f;
-
-            List.Add(this);
         }
 
         public Player Player { get; }
@@ -104,7 +102,27 @@ namespace MurderMystery.API
                 }
             }
 
-            for (int i = 0; i < List.Count; i++)
+            foreach (MMPlayer ply in List)
+            {
+                if (ply.IsAlive())
+                {
+                    ply.Player.SetRole(RoleType.ClassD);
+                    Timing.CallDelayed(0.5f, () =>
+                    {
+                        ply.Player.Position = RoleType.Scp049.GetRandomSpawnPoint();
+                        ply.Player.AddItem(ItemType.Painkillers);
+                        ply.Player.Ammo[(int)AmmoType.Nato9] = int.MaxValue;
+                        BroadcastRoleInfo(ply);
+                    });
+                }
+                else
+                {
+                    ply.Player.SetRole(RoleType.Spectator);
+                    BroadcastRoleInfo(ply);
+                }
+            }
+
+            /*for (int i = 0; i < List.Count; i++)
             {
                 if (List[i].IsAlive())
                 {
@@ -122,7 +140,7 @@ namespace MurderMystery.API
                     List[i].Player.SetRole(RoleType.Spectator);
                     BroadcastRoleInfo(List[i]);
                 }
-            }
+            }*/
 
             MurderMystery.CoroutineManager.RunServerCoroutine(HandOutEquipment(MurderMystery.Singleton.Config.EquipmentTime));
         }
@@ -268,7 +286,7 @@ namespace MurderMystery.API
         internal static void Add(VerifiedEventArgs ev)
         {
             Log.Debug("Player added to list.", MurderMystery.Singleton.Debug);
-            new MMPlayer(ev.Player);
+            List.Add(new MMPlayer(ev.Player));
         }
         internal static void Remove(DestroyingEventArgs ev)
         {

@@ -1,5 +1,6 @@
 ﻿using GameCore;
 using HarmonyLib;
+using Exiled.API.Features;
 
 namespace MurderMystery.API
 {
@@ -17,22 +18,31 @@ namespace MurderMystery.API
 
         internal void TogglingSecondaryEvents(bool enabling)
         {
+            Exiled.API.Features.Log.Debug($"[CompatibilityManager] TogglingSecondaryEvents called. Enabling: {enabling}");
+
             if (enabling)
             {
                 Harmony.PatchAll();
+
+                MurderMystery.GamemodeManager.Patched = true;
 
                 ServerConsole.FriendlyFire = true;
                 CharacterClassManager.LaterJoinEnabled = false;
             }
             else
             {
-                Harmony.UnpatchAll();
-
-                MurderMystery.CoroutineManager.Reset();
-
                 ServerConsole.FriendlyFire = ConfigFile.ServerConfig.GetBool("friendly_fire");
                 CharacterClassManager.LaterJoinEnabled = ConfigFile.ServerConfig.GetBool("later_join_enabled", true);
             }
+        }
+
+        internal void Reset()
+        {
+            Harmony.UnpatchAll();
+
+            MurderMystery.GamemodeManager.Patched = false;
+
+            MurderMystery.CoroutineManager.Reset();
         }
     }
 }

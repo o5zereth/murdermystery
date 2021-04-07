@@ -1,6 +1,6 @@
 ﻿namespace MurderMystery.API
 {
-    public class MMTester
+    /*public class MMTester
     {
         internal MMTester()
         {
@@ -95,10 +95,10 @@
                     while (TesterCooldown > 0f)
                     {
                         Timing.WaitForSeconds(1f);
-                        TesterCooldown -= 1f
+                        TesterCooldown -= 1f;
                     }
                 }
             }
         }
-    }
+    }*/
 }
