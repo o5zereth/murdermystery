@@ -157,8 +157,8 @@ namespace MurderMystery.API
 
             while (DetectiveGunLossCooldown > 0f)
             {
-                yield return Timing.WaitForSeconds(1f);
-                DetectiveGunLossCooldown -= 1f;
+                yield return Timing.WaitForSeconds(0.1f);
+                DetectiveGunLossCooldown -= 0.1f;
             }
 
             yield break;
@@ -194,7 +194,7 @@ namespace MurderMystery.API
                 switch (ply.Role)
                 {
                     case MMRole.Murderer:
-                        if (List.MurderersCount() == 1)
+                        if (List.Murderers().Count() == 1)
                         {
                             return "<color=#ff0000><size=30>You are alone and the only murderer.\nGodspeed.</size></color>";
                         }
@@ -202,19 +202,16 @@ namespace MurderMystery.API
                         {
                             StringBuilder builder = new StringBuilder();
                             builder.Append("<color=#ff0000><size=30>Remember your fellow murderers:</size><size=25>\n");
-                            foreach (MMPlayer ply2 in List.Murderers())
+                            foreach (MMPlayer ply2 in List.Murderers().Where(x => x.Player.Id != ply.Player.Id))
                             {
-                                if (ply2.Player.Id != ply.Player.Id)
-                                {
-                                    builder.Append($"{ply2.Player.Nickname}, ");
-                                }
+                                builder.Append($"{ply2.Player.Nickname}, ");
                             }
                             builder.Append("</size></color>");
                             builder.Replace(", </size></color>", "</size></color>");
                             return builder.ToString();
                         }
                     case MMRole.Detective:
-                        if (List.DetectivesCount() == 1)
+                        if (List.Detectives().Count() == 1)
                         {
                             return "<color=#0000ff><size=30>You are alone and the only detective.\nGodspeed.</size></color>";
                         }
@@ -222,12 +219,9 @@ namespace MurderMystery.API
                         {
                             StringBuilder builder = new StringBuilder();
                             builder.Append("<color=#0000ff><size=30>Remember your fellow detectives:</size><size=25>\n");
-                            foreach (MMPlayer ply2 in List.Detectives())
+                            foreach (MMPlayer ply2 in List.Detectives().Where(x => x.Player.Id != ply.Player.Id))
                             {
-                                if (ply2.Player.Id != ply.Player.Id)
-                                {
-                                    builder.Append($"{ply2.Player.Nickname}, ");
-                                }
+                                builder.Append($"{ply2.Player.Nickname}, ");
                             }
                             builder.Append("</size></color>");
                             builder.Replace(", </size></color>", "</size></color>");

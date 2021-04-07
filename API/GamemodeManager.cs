@@ -165,13 +165,10 @@ namespace MurderMystery.API
 
                 EnablePrimary(false);
 
-                // Makes sure that if the round is restarted without it ending, the events / coroutines are reset.
-                if (SecondaryEventsEnabled)
+                if (!Ended && SecondaryEventsEnabled) // Makes sure that if the round is restarted without it ending, the events / coroutines are reset.
                 {
                     EnableSecondary(false);
-                }
-                if (!Ended)
-                {
+
                     MurderMystery.CoroutineManager.Reset();
                 }
 

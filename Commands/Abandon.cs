@@ -30,7 +30,7 @@ namespace MurderMystery.Commands
             if (MurderMystery.GamemodeManager.ForceRoundEnd)
             {
                 Log.Debug("ForceRoundEnd command is being used twice, this may cause unexpected behavior!");
-                MurderMystery.GamemodeManager.EnableGamemode(false);
+                MurderMystery.GamemodeManager.EnableSecondary(false);
                 response = "Attempting to disable the event mid-round... (Note: This is a last resort to forcefully end the gamemode.)";
                 return true;
             }

@@ -53,6 +53,8 @@ namespace MurderMystery
 
             MurderMystery.GamemodeManager.EnableSecondary(false);
 
+            MurderMystery.CoroutineManager.Reset();
+
             MurderMystery.GamemodeManager.Ended = true;
         }
         internal void RestartingRound()
@@ -349,14 +351,11 @@ namespace MurderMystery
             // Update doors to lock most rooms in HCZ.
             for (int i = 0; i < Map.Doors.Count; i++)
             {
-                Map.Doors[i].NetworkTargetState = true;
-
                 switch (Map.Doors[i].RequiredPermissions.RequiredPermissions, Map.Doors[i].GetNametag())
                 {
                     // No permssion doors.
                     case (KeycardPermissions.None, _):
                         continue;
-                    
                     // Checkpoints.
                     case (KeycardPermissions.Checkpoints, _):
                         Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
@@ -376,18 +375,18 @@ namespace MurderMystery
                         Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
                         Map.Doors[i].NetworkTargetState = false;
                         continue;
-                    case (_, "106_PRIMARY"):
-                        Map.Doors[i].ServerChangeLock(DoorLockReason.Warhead, true);
-                        Map.Doors[i].NetworkTargetState = true;
+                    /*case (_, "106_PRIMARY"):
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
                         continue;
                     case (_, "106_SECONDARY"):
-                        Map.Doors[i].ServerChangeLock(DoorLockReason.Warhead, true);
-                        Map.Doors[i].NetworkTargetState = true;
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
                         continue;
                     case (_, "106_BOTTOM"):
-                        Map.Doors[i].ServerChangeLock(DoorLockReason.Warhead, true);
-                        Map.Doors[i].NetworkTargetState = true;
-                        continue;
+                        Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
+                        Map.Doors[i].NetworkTargetState = false;
+                        continue;*/
                     case (_, "HID"):
                         Map.Doors[i].ServerChangeLock(DoorLockReason.AdminCommand, true);
                         Map.Doors[i].NetworkTargetState = false;
@@ -402,7 +401,7 @@ namespace MurderMystery
             }
 
             // Wait for item spawns from door updates.
-            yield return Timing.WaitForSeconds(0.5f);
+            yield return Timing.WaitForSeconds(0.2f);
 
             // Remove all items spawned.
             foreach (Pickup item in Object.FindObjectsOfType<Pickup>())

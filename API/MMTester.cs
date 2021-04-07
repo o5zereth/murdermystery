@@ -1,6 +1,6 @@
 ﻿namespace MurderMystery.API
 {
-    public class MMTester
+    /*public class MMTester
     {
         internal MMTester()
         {
@@ -31,12 +31,10 @@
                         Z = new Vector2(HczArmory.gameObject.transform.position.z - 3.1f, HczArmory.gameObject.transform.position.z + 3.1f);
                         break;
                     default:
-                        Log.Error($"(MMTester) Rotation was not found! {Mathf.RoundToInt(HczArmory.gameObject.transform.rotation.eulerAngles.y)}, the tester will not work!");
+                        Log.Error($"(MMTester ctor) Rotation was not found! {Mathf.RoundToInt(HczArmory.gameObject.transform.rotation.eulerAngles.y)}, the tester will not work!");
                         Singleton = null;
                         break;
                 }
-
-                TesterCooldown = -1f;
 
                 Singleton = this;
             }
@@ -52,53 +50,22 @@
 
         public DoorVariant HczArmory { get; }
 
+        /// <summary>
+        /// Represents the minimum (x) and maximum (y) float values for x position to be within the x range of the tester room.
+        /// </summary>
         public Vector2 X { get; }
+        /// <summary>
+        /// Represents the minimum (x) and maximum (y) float values for y position to be within the y range of the tester room.
+        /// </summary>
         public Vector2 Y { get; }
+        /// <summary>
+        /// Represents the minimum (x) and maximum (y) float values for z position to be within the z range of the tester room.
+        /// </summary>
         public Vector2 Z { get; }
-
-        public float TesterCooldown { get; private set; }
 
         public bool WithinRange(Vector3 pos)
         {
             return (pos.x >= X.x) && (pos.x <= X.y) && (pos.y >= Y.x) && (pos.y <= Y.y) && (pos.z >= Z.x) && (pos.z <= Z.y);
         }
-
-        internal IEnumerator<float> TesterCoroutine()
-        {
-            List<MMPlayer> Players = new List<MMPlayer>();
-
-            while (true)
-            {
-                yield return Timing.WaitForSeconds(0.1f);
-
-                if (TesterCooldown <= 0f)
-                {
-                    Players.Clear();
-
-                    for (int i = 0; i < MMPlayer.List.Count; i++)
-                    {
-                        if (MMPlayer.List[i].IsAlive())
-                        {
-                            Players.Add(MMPlayer.List[i]);
-                        }
-                    }
-
-                    if (Players.Count != 3)
-                    {
-                        continue;
-                    }
-
-
-                }
-                else
-                {
-                    while (TesterCooldown > 0f)
-                    {
-                        Timing.WaitForSeconds(1f);
-                        TesterCooldown -= 1f
-                    }
-                }
-            }
-        }
-    }
+    }*/
 }
