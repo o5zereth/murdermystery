@@ -137,21 +137,6 @@ namespace MurderMystery.API
                 _secondaryEventsEnabled = value;
             }
         }
-        public bool Patched
-        {
-            get
-            {
-                return _patched;
-            }
-            internal set
-            {
-                if (MurderMystery.Singleton.DebugVERBOSE)
-                {
-                    Log.Debug($"[GamemodeManager] Setting Patched to {value}.");
-                }
-                _patched = value;
-            }
-        }
 
         private bool _enabled;
         private bool _started;
@@ -161,7 +146,6 @@ namespace MurderMystery.API
         private bool _waitingForPlayers;
         private bool _primaryEventsEnabled;
         private bool _secondaryEventsEnabled;
-        private bool _patched;
 
         internal void EnableGamemode(bool enable = true)
         {
@@ -186,8 +170,6 @@ namespace MurderMystery.API
                 {
                     EnableSecondary(false);
                 }
-
-                MurderMystery.CompatabilityManager.Reset();
 
                 Enabled = false;
                 Ended = false;

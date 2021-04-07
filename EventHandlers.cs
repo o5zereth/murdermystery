@@ -86,8 +86,7 @@ namespace MurderMystery
         }
         internal void EndingRound(EndingRoundEventArgs ev)
         {
-            ev.IsAllowed = false;
-            ev.IsRoundEnded = false;
+            ev.IsAllowed = true;
 
             // Make sure the round doesn't end before setting everyones roles.
             if (Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
@@ -97,37 +96,34 @@ namespace MurderMystery
             {
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>All murderers have been defeated.</size>");
-                ev.IsAllowed = true;
-                ev.IsRoundEnded = true;
+                return;
             }
             if (MMPlayer.List.InnocentsCount() + MMPlayer.List.DetectivesCount() == 0 && MMPlayer.List.MurderersCount() > 0) // End the gamemode if there are no innocents or detectives left.
             {
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#ff0000><b>Murderers win</b></color></size>\n<size=30>All innocents have been defeated.</size>");
-                ev.IsAllowed = true;
-                ev.IsRoundEnded = true;
+                return;
             }
             if (MMPlayer.List.InnocentsCount() + MMPlayer.List.DetectivesCount() == 0 && MMPlayer.List.MurderersCount() == 0) // End the gamemode if there are no roles left alive.
             {
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>All players have been killed.</size>");
-                ev.IsAllowed = true;
-                ev.IsRoundEnded = true;
+                return;
             }
             if (MurderMystery.GamemodeManager.ForceRoundEnd) // End the gamemode forcefully if prompted.
             {
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#7f7f7f><b>Stalemate</b></color></size>\n<size=30>Round was force ended by an administrator.</size>");
-                ev.IsAllowed = true;
-                ev.IsRoundEnded = true;
+                return;
             }
             if (MurderMystery.GamemodeManager.RoundEndTime <= 0f) // End the gamemode if the murderers run out of time.
             {
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>Murderers ran out of time and lost.</size>");
-                ev.IsAllowed = true;
-                ev.IsRoundEnded = true;
+                return;
             }
+
+            ev.IsAllowed = false;
         }
         internal void Died(DiedEventArgs ev)
         {
@@ -326,8 +322,6 @@ namespace MurderMystery
         {
             MMPlayer ply = MMPlayer.Get(ev.Player);
 
-            if (Round.ElapsedTime.TotalMilliseconds <= 5000 || !MurderMystery.GamemodeManager.Started) { return; }
-
             Timing.CallDelayed(1f, () =>
             {
                 if (ev.NewRole == RoleType.Spectator && ply.Role != MMRole.Spectator)
@@ -336,6 +330,11 @@ namespace MurderMystery
                 }
                 else if (ply.Role != MMRole.Spectator)
                 {
+                    if (ev.NewRole == RoleType.ClassD && Round.ElapsedTime.TotalMilliseconds <= 5000)
+                    {
+                        return;
+                    }
+
                     ply.SoftlySetRole(MMRole.Spectator);
                     ply.Player.Broadcast(15, "<size=30>Your role has been set to spectator due to a role change,\nif this is unexpected then please contact the developer.</size>");
                 }
@@ -356,7 +355,6 @@ namespace MurderMystery
                 {
                     // No permssion doors.
                     case (KeycardPermissions.None, _):
-                        Map.Doors[i].NetworkTargetState = false;
                         continue;
                     
                     // Checkpoints.
