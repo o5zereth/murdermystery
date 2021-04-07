@@ -170,6 +170,10 @@ namespace MurderMystery.API
                 {
                     EnableSecondary(false);
                 }
+                if (!Ended)
+                {
+                    MurderMystery.CoroutineManager.Reset();
+                }
 
                 Enabled = false;
                 Ended = false;
