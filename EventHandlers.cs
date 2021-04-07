@@ -412,10 +412,7 @@ namespace MurderMystery
             // Lock elevators to light containment to prevent access.
             for (int i = 0; i < Map.Lifts.Count; i++)
             {
-                if (Map.Lifts[i].Type() != ElevatorType.Scp049)
-                {
-                    Map.Lifts[i].Network_locked = true;
-                }
+                Map.Lifts[i].Network_locked = true;
             }
         }
         internal IEnumerator<float> DetectiveWeaponPickup(Pickup item)
