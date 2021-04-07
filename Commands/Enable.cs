@@ -25,8 +25,7 @@ namespace MurderMystery.Commands
                 response = "The murder mystery gamemode is already enabled.";
                 return false;
             }
-
-            if (MurderMystery.GamemodeManager.Started)
+            else if (MurderMystery.GamemodeManager.Started)
             {
                 response = "The murder mystery gamemode is currently active.";
                 return false;

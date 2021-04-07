@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using MEC;
+using MurderMystery.Extensions;
 using System.Collections.Generic;
 
 namespace MurderMystery.API

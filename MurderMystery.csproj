@@ -99,14 +99,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\CompatibilityManager.cs" />
     <Compile Include="API\Enums.cs" />
     <Compile Include="API\MMTester.cs" />
     <Compile Include="Commands\Abandon.cs" />
     <Compile Include="Commands\Disable.cs" />
     <Compile Include="Commands\Enable.cs" />
     <Compile Include="Commands\MurderMysteryCmds.cs" />
-    <Compile Include="Commands\ViewPlayers.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Extensions\PlayerExt.cs" />
