@@ -1,20 +1,20 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
-using Handlers = Exiled.Events.Handlers;
 using HarmonyLib;
-using System;
 using MurderMystery.API;
+using System;
+using Handlers = Exiled.Events.Handlers;
 
 namespace MurderMystery
 {
     public class MurderMystery : Plugin<Config>
     {
-        public override string Author => "Zereth";
-        public override string Name => "MurderMystery";
-        public override string Prefix => "murder_mystery";
-        public override PluginPriority Priority => PluginPriority.Default;
-        public override Version RequiredExiledVersion => new Version(2, 8, 0);
-        public override Version Version => new Version(1, 0, 0);
+        public override string Author { get; } = "Zereth";
+        public override string Name { get; } = "MurderMystery";
+        public override string Prefix { get; } = "murder_mystery";
+        public override PluginPriority Priority { get; } = PluginPriority.Default;
+        public override Version RequiredExiledVersion { get; } = new Version(2, 8, 0);
+        public override Version Version { get; } = new Version(1, 0, 0);
         public bool Debug { get; } = true;
 
         public static MurderMystery Singleton { get; private set; }
@@ -75,7 +75,6 @@ namespace MurderMystery
 
             Handlers.Player.Verified += MMPlayer.Add;
             Handlers.Player.Destroying += MMPlayer.Remove;
-            Handlers.Server.RestartingRound += MMPlayer.RemoveAll;
 
             Singleton = this;
             EventHandlers = new EventHandlers();
@@ -94,7 +93,6 @@ namespace MurderMystery
 
             Handlers.Player.Verified -= MMPlayer.Add;
             Handlers.Player.Destroying -= MMPlayer.Remove;
-            Handlers.Server.RestartingRound -= MMPlayer.RemoveAll;
 
             Singleton = null;
             EventHandlers = null;

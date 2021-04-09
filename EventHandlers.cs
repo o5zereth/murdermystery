@@ -314,6 +314,29 @@ namespace MurderMystery
             // Don't allow femur breaker usage.
             ev.IsAllowed = false;
         }
+        internal void ChangingRole(ChangingRoleEventArgs ev)
+        {
+            if (!MurderMystery.GamemodeManager.Started) { return; }
+
+            if (ev.NewRole == RoleType.ClassD && Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
+
+            MMPlayer ply = MMPlayer.Get(ev.Player);
+
+            Timing.CallDelayed(0.5f, () =>
+            {
+                if (ply.Role == MMRole.Spectator)
+                {
+                    if (ev.NewRole == RoleType.Spectator)
+                    {
+                        ply.SoftlySetRole(MMRole.Spectator);
+                        return;
+                    }
+
+                    ply.SoftlySetRole(MMRole.Spectator);
+                    ply.Player.Broadcast(15, "<size=30>Your role has been set to spectator due to a role change,\nif this is unexpected then please contact the developer.</size>");
+                }
+            });
+        }
 
         // Coroutines
         internal IEnumerator<float> SetupEvent()

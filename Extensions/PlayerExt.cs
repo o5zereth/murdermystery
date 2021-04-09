@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using MurderMystery.API;
+using System.Collections.Generic;
 using System.Linq;
-using MurderMystery.API;
 
 namespace MurderMystery.Extensions
 {

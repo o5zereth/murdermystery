@@ -1,7 +1,4 @@
-﻿using Exiled.API.Features;
-using MEC;
-using MurderMystery.Extensions;
-using System.Collections.Generic;
+﻿using GameCore;
 using Handlers = Exiled.Events.Handlers;
 
 namespace MurderMystery.API
@@ -30,11 +27,11 @@ namespace MurderMystery.API
 
         internal void EnableGamemode(bool enable = true)
         {
-            Log.Debug($"EnableGamemode Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
+            Exiled.API.Features.Log.Debug($"EnableGamemode Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
 
             if (enable)
             {
-                if (Enabled) { Log.Debug("EnableGamemode: Gamemode is already enabled.", MurderMystery.Singleton.Debug); return; }
+                if (Enabled) { Exiled.API.Features.Log.Debug("EnableGamemode: Gamemode is already enabled.", MurderMystery.Singleton.Debug); return; }
 
                 EnablePrimary();
 
@@ -42,7 +39,7 @@ namespace MurderMystery.API
             }
             else
             {
-                if (!Enabled) { Log.Debug("EnableGamemode: Gamemode is already disabled.", MurderMystery.Singleton.Debug); return; }
+                if (!Enabled) { Exiled.API.Features.Log.Debug("EnableGamemode: Gamemode is already disabled.", MurderMystery.Singleton.Debug); return; }
 
                 EnablePrimary(false);
 
@@ -51,6 +48,12 @@ namespace MurderMystery.API
                     EnableSecondary(false);
 
                     MurderMystery.CoroutineManager.Reset();
+                }
+
+                if (Started)
+                {
+                    ServerConsole.FriendlyFire = ConfigFile.ServerConfig.GetBool("friendly_fire");
+                    CharacterClassManager.LaterJoinEnabled = ConfigFile.ServerConfig.GetBool("later_join_enabled", true);
                 }
 
                 Enabled = false;
@@ -63,11 +66,11 @@ namespace MurderMystery.API
         }
         internal void EnablePrimary(bool enable = true)
         {
-            Log.Debug($"EnablePrimary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
+            Exiled.API.Features.Log.Debug($"EnablePrimary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
 
             if (enable)
             {
-                if (PrimaryEventsEnabled) { Log.Debug("EnablePrimary: Primary events are already enabled.", MurderMystery.Singleton.Debug); return; }
+                if (PrimaryEventsEnabled) { Exiled.API.Features.Log.Debug("EnablePrimary: Primary events are already enabled.", MurderMystery.Singleton.Debug); return; }
 
                 Handlers.Server.WaitingForPlayers += MurderMystery.EventHandlers.WaitingForPlayers;
                 Handlers.Server.RoundStarted += MurderMystery.EventHandlers.RoundStarted;
@@ -78,7 +81,7 @@ namespace MurderMystery.API
             }
             else
             {
-                if (!PrimaryEventsEnabled) { Log.Debug("EnablePrimary: Primary events are already disabled.", MurderMystery.Singleton.Debug); return; }
+                if (!PrimaryEventsEnabled) { Exiled.API.Features.Log.Debug("EnablePrimary: Primary events are already disabled.", MurderMystery.Singleton.Debug); return; }
 
                 Handlers.Server.WaitingForPlayers -= MurderMystery.EventHandlers.WaitingForPlayers;
                 Handlers.Server.RoundStarted -= MurderMystery.EventHandlers.RoundStarted;
@@ -90,11 +93,11 @@ namespace MurderMystery.API
         }
         internal void EnableSecondary(bool enable = true)
         {
-            Log.Debug($"EnableSecondary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
+            Exiled.API.Features.Log.Debug($"EnableSecondary Primary Function called. {(enable ? "[Enabling]" : "[Disabling]")}", MurderMystery.Singleton.Debug);
 
             if (enable)
             {
-                if (SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already enabled.", MurderMystery.Singleton.Debug); return; }
+                if (SecondaryEventsEnabled) { Exiled.API.Features.Log.Debug("EnableSecondary: Secondary events are already enabled.", MurderMystery.Singleton.Debug); return; }
 
                 Handlers.Player.Verified += MurderMystery.EventHandlers.Joined;
                 Handlers.Server.EndingRound += MurderMystery.EventHandlers.EndingRound;
@@ -107,12 +110,16 @@ namespace MurderMystery.API
                 Handlers.Player.TriggeringTesla += MurderMystery.EventHandlers.TriggeringTesla;
                 Handlers.Server.RespawningTeam += MurderMystery.EventHandlers.RespawningTeam;
                 Handlers.Player.EnteringFemurBreaker += MurderMystery.EventHandlers.EnteringFemurBreaker;
+                Handlers.Player.ChangingRole += MurderMystery.EventHandlers.ChangingRole;
+
+                ServerConsole.FriendlyFire = true;
+                CharacterClassManager.LaterJoinEnabled = false;
 
                 SecondaryEventsEnabled = true;
             }
             else
             {
-                if (!SecondaryEventsEnabled) { Log.Debug("EnableSecondary: Secondary events are already disabled.", MurderMystery.Singleton.Debug); return; }
+                if (!SecondaryEventsEnabled) { Exiled.API.Features.Log.Debug("EnableSecondary: Secondary events are already disabled.", MurderMystery.Singleton.Debug); return; }
 
                 Handlers.Player.Verified -= MurderMystery.EventHandlers.Joined;
                 Handlers.Server.EndingRound -= MurderMystery.EventHandlers.EndingRound;
@@ -125,6 +132,7 @@ namespace MurderMystery.API
                 Handlers.Player.TriggeringTesla -= MurderMystery.EventHandlers.TriggeringTesla;
                 Handlers.Server.RespawningTeam -= MurderMystery.EventHandlers.RespawningTeam;
                 Handlers.Player.EnteringFemurBreaker -= MurderMystery.EventHandlers.EnteringFemurBreaker;
+                Handlers.Player.ChangingRole -= MurderMystery.EventHandlers.ChangingRole;
 
                 SecondaryEventsEnabled = false;
             }

@@ -1,11 +1,11 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using MEC;
 using MurderMystery.Extensions;
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using MEC;
-using Exiled.API.Enums;
+using System.Linq;
 using System.Text;
 
 namespace MurderMystery.API
@@ -46,7 +46,7 @@ namespace MurderMystery.API
 
             foreach (MMPlayer ply in List.Nones())
             {
-                Log.Debug("Player found in list without a role, setting to innocent.", MurderMystery.Singleton.Debug);
+                Log.Debug("Player found in list without a role, setting to innocent for role calculation...", MurderMystery.Singleton.Debug);
                 ply.Role = MMRole.Innocent;
             }
 
@@ -99,7 +99,7 @@ namespace MurderMystery.API
                 if (ply.IsAlive())
                 {
                     ply.Player.SetRole(RoleType.ClassD);
-                    Timing.CallDelayed(0.2f, () =>
+                    Timing.CallDelayed(0.5f, () =>
                     {
                         ply.Player.Position = RoleType.Scp049.GetRandomSpawnPoint();
                         ply.Player.AddItem(ItemType.Painkillers);
@@ -147,8 +147,8 @@ namespace MurderMystery.API
 
             while (DetectiveGunLossCooldown > 0f)
             {
-                yield return Timing.WaitForSeconds(0.1f);
-                DetectiveGunLossCooldown -= 0.1f;
+                yield return Timing.WaitForSeconds(1f);
+                DetectiveGunLossCooldown -= 1f;
             }
 
             yield break;
@@ -258,11 +258,6 @@ namespace MurderMystery.API
         {
             Log.Debug("Player removed from list.", MurderMystery.Singleton.Debug);
             Dictionary.Remove(ev.Player);
-        }
-        internal static void RemoveAll()
-        {
-            Log.Debug("CLearing all players from list.", MurderMystery.Singleton.Debug);
-            Dictionary.Clear();
         }
     }
 }
