@@ -1,16 +1,16 @@
-﻿using Exiled.API.Features;
-using MEC;
-using Exiled.Events.EventArgs;
-using System.Linq;
-using System.Collections.Generic;
-using MurderMystery.Extensions;
-using Interactables.Interobjects.DoorUtils;
-using CustomPlayerEffects;
+﻿using CustomPlayerEffects;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
-using static Broadcast;
-using UnityEngine;
+using Exiled.API.Features;
+using Exiled.Events.EventArgs;
+using Interactables.Interobjects.DoorUtils;
+using MEC;
 using MurderMystery.API;
+using MurderMystery.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using static Broadcast;
 
 namespace MurderMystery
 {
@@ -33,7 +33,7 @@ namespace MurderMystery
 
             if (Plugin.Config.RequireRoundRestart && !MurderMystery.GamemodeManager.WaitingForPlayers) { Log.Debug("Round has not restarted, the gamemode will not begin.", Plugin.Debug); return; } else { Log.Debug("Gamemode is starting..."); }
 
-            if (MMPlayer.List.Count() < 8 && !Plugin.Debug)
+            if (MMPlayer.List.Count < 8 && !Plugin.Debug)
             {
                 Map.Broadcast(10, "<size=30>There must be atleast 8 players to start the gamemode!</size>", BroadcastFlags.Monospaced);
                 MurderMystery.GamemodeManager.EnableGamemode(false);
@@ -95,19 +95,19 @@ namespace MurderMystery
             if (Round.ElapsedTime.TotalMilliseconds <= 5000) { return; }
 
             // Check the remaining roles to determine if the game should end.
-            if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() > 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no murderers left.
+            if (MMPlayer.List.OfRoleCount(MMRole.Innocent) + MMPlayer.List.OfRoleCount(MMRole.Detective) > 0 && MMPlayer.List.OfRoleCount(MMRole.Murderer) == 0) // End the gamemode if there are no murderers left.
             {
                 ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#00ff00><b>Innocents win</b></color></size>\n<size=30>All murderers have been defeated.</size>");
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() > 0) // End the gamemode if there are no innocents or detectives left.
+            else if (MMPlayer.List.OfRoleCount(MMRole.Innocent) + MMPlayer.List.OfRoleCount(MMRole.Detective) == 0 && MMPlayer.List.OfRoleCount(MMRole.Murderer) > 0) // End the gamemode if there are no innocents or detectives left.
             {
                 ev.IsAllowed = true;
                 Map.ClearBroadcasts();
                 Map.Broadcast(30, "\n<size=80><color=#ff0000><b>Murderers win</b></color></size>\n<size=30>All innocents have been defeated.</size>");
             }
-            else if (MMPlayer.List.Innocents().Count() + MMPlayer.List.Detectives().Count() == 0 && MMPlayer.List.Murderers().Count() == 0) // End the gamemode if there are no roles left alive.
+            else if (MMPlayer.List.OfRoleCount(MMRole.Innocent) + MMPlayer.List.OfRoleCount(MMRole.Detective) == 0 && MMPlayer.List.OfRoleCount(MMRole.Murderer) == 0) // End the gamemode if there are no roles left alive.
             {
                 ev.IsAllowed = true;
                 Map.ClearBroadcasts();

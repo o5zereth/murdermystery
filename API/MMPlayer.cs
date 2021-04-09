@@ -5,7 +5,6 @@ using MEC;
 using MurderMystery.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MurderMystery.API
@@ -28,13 +27,19 @@ namespace MurderMystery.API
             Role = role;
         }
 
-        public static IEnumerable<MMPlayer> List => Dictionary.Values;
-
-        private static Dictionary<Player, MMPlayer> Dictionary { get; set; } = new Dictionary<Player, MMPlayer>();
+        public static List<MMPlayer> List { get; } = new List<MMPlayer>();
 
         public static MMPlayer Get(Player player)
         {
-            return Dictionary.TryGetValue(player, out MMPlayer ply) ? ply : null;
+            for (int i = 0; i < List.Count; i++)
+            {
+                if (List[i].Player == player)
+                {
+                    return List[i];
+                }
+            }
+
+            return null;
         }
 
         // Coroutines
@@ -44,53 +49,54 @@ namespace MurderMystery.API
 
             yield return Timing.WaitForSeconds(0.2f);
 
-            foreach (MMPlayer ply in List.Nones())
+            foreach (MMPlayer ply in List.OfRole(MMRole.None))
             {
                 Log.Debug("Player found in list without a role, setting to innocent for role calculation...", MurderMystery.Singleton.Debug);
                 ply.Role = MMRole.Innocent;
             }
 
-            CalculateRoleCounts(List.Innocents().Count(), out int m, out int d);
+            CalculateRoleCounts(List.OfRoleCount(MMRole.Innocent), out int m, out int d);
 
-            while (List.Murderers().Count() < m || List.Detectives().Count() < d)
+            while (List.OfRoleCount(MMRole.Murderer) < m || List.OfRoleCount(MMRole.Detective) < d)
             {
-                if (List.Murderers().Count() < m)
+                if (List.OfRoleCount(MMRole.Murderer) < m)
                 {
                     Random rng = new Random();
 
-                    int r = rng.Next(List.Innocents().Count());
-                    List.Innocents().ToArray()[r].Role = MMRole.Murderer;
+                    int r = rng.Next(List.OfRoleCount(MMRole.Innocent));
+                    List.OfRole(MMRole.Innocent)[r].Role = MMRole.Murderer;
                 }
-                if (List.Detectives().Count() < d)
+                if (List.OfRoleCount(MMRole.Detective) < d)
                 {
                     Random rng = new Random();
 
-                    int r = rng.Next(List.Innocents().Count());
-                    List.Innocents().ToArray()[r].Role = MMRole.Detective;
+                    int r = rng.Next(List.OfRoleCount(MMRole.Innocent));
+                    List.OfRole(MMRole.Innocent)[r].Role = MMRole.Detective;
                 }
             }
 
             if (MurderMystery.Singleton.Debug)
             {
-                foreach (MMPlayer ply in List.Nones())
+                for (int i = 0; i < List.Count; i++)
                 {
-                    Log.Error($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a NONE. (An error occured.)");
-                }
-                foreach (MMPlayer ply in List.Spectators())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a spectator. (In overwatch mode.)");
-                }
-                foreach (MMPlayer ply in List.Innocents())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as an innocent.");
-                }
-                foreach (MMPlayer ply in List.Murderers())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a murderer.");
-                }
-                foreach (MMPlayer ply in List.Detectives())
-                {
-                    Log.Debug($"{ply.Player.Nickname} ({ply.Player.Id}) was selected as a detective.");
+                    switch (List[i].Role)
+                    {
+                        case MMRole.None:
+                            Log.Error($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a NONE. (An error occured.)");
+                            continue;
+                        case MMRole.Spectator:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a spectator. (In overwatch mode.)");
+                            continue;
+                        case MMRole.Innocent:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as an innocent.");
+                            continue;
+                        case MMRole.Murderer:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a murderer.");
+                            continue;
+                        case MMRole.Detective:
+                            Log.Debug($"{List[i].Player.Nickname} ({List[i].Player.Id}) was selected as a detective.");
+                            continue;
+                    }
                 }
             }
 
@@ -184,37 +190,51 @@ namespace MurderMystery.API
                 switch (ply.Role)
                 {
                     case MMRole.Murderer:
-                        if (List.Murderers().Count() == 1)
+                        List<MMPlayer> Murderers = List.OfRole(MMRole.Murderer);
+                        if (Murderers.Count == 1)
                         {
                             return "<color=#ff0000><size=30>You are alone and the only murderer.\nGodspeed.</size></color>";
                         }
                         else
                         {
                             StringBuilder builder = new StringBuilder();
+
                             builder.Append("<color=#ff0000><size=30>Remember your fellow murderers:</size><size=25>\n");
-                            foreach (MMPlayer ply2 in List.Murderers().Where(x => x.Player.Id != ply.Player.Id))
+
+                            for (int i = 0; i < Murderers.Count; i++)
                             {
-                                builder.Append($"{ply2.Player.Nickname}, ");
+                                if (Murderers[i].Player.Id != ply.Player.Id)
+                                {
+                                    builder.Append(i == Murderers.Count - 1 ? Murderers[i].Player.Nickname : Murderers[i].Player.Nickname + ", ");
+                                }
                             }
+
                             builder.Append("</size></color>");
-                            builder.Replace(", </size></color>", "</size></color>");
+
                             return builder.ToString();
                         }
                     case MMRole.Detective:
-                        if (List.Detectives().Count() == 1)
+                        List<MMPlayer> Detectives = List.OfRole(MMRole.Murderer);
+                        if (Detectives.Count == 1)
                         {
                             return "<color=#0000ff><size=30>You are alone and the only detective.\nGodspeed.</size></color>";
                         }
                         else
                         {
                             StringBuilder builder = new StringBuilder();
-                            builder.Append("<color=#0000ff><size=30>Remember your fellow detectives:</size><size=25>\n");
-                            foreach (MMPlayer ply2 in List.Detectives().Where(x => x.Player.Id != ply.Player.Id))
+
+                            builder.Append("<color=#0000ff><size=30>Remember your fellow murderers:</size><size=25>\n");
+
+                            for (int i = 0; i < Detectives.Count; i++)
                             {
-                                builder.Append($"{ply2.Player.Nickname}, ");
+                                if (Detectives[i].Player.Id != ply.Player.Id)
+                                {
+                                    builder.Append(i == Detectives.Count - 1 ? Detectives[i].Player.Nickname : Detectives[i].Player.Nickname + ", ");
+                                }
                             }
+
                             builder.Append("</size></color>");
-                            builder.Replace(", </size></color>", "</size></color>");
+
                             return builder.ToString();
                         }
                     default:
@@ -252,12 +272,12 @@ namespace MurderMystery.API
         internal static void Add(VerifiedEventArgs ev)
         {
             Log.Debug("Player added to list.", MurderMystery.Singleton.Debug);
-            Dictionary.Add(ev.Player, new MMPlayer(ev.Player));
+            List.Add(new MMPlayer(ev.Player));
         }
         internal static void Remove(DestroyingEventArgs ev)
         {
             Log.Debug("Player removed from list.", MurderMystery.Singleton.Debug);
-            Dictionary.Remove(ev.Player);
+            List.Remove(Get(ev.Player));
         }
     }
 }

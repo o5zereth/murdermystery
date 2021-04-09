@@ -1,39 +1,64 @@
 ﻿using MurderMystery.API;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MurderMystery.Extensions
 {
     public static class PlayerExt
     {
-        public static IEnumerable<MMPlayer> Nones(this IEnumerable<MMPlayer> list)
+        public static List<MMPlayer> OfRole(this List<MMPlayer> list, MMRole role)
         {
-            return list.Where(ply => ply.Role == MMRole.None);
+            List<MMPlayer> output = new List<MMPlayer>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Role == role)
+                {
+                    output.Add(list[i]);
+                }
+            }
+
+            return output;
         }
 
-        public static IEnumerable<MMPlayer> Spectators(this IEnumerable<MMPlayer> list)
+        public static List<MMPlayer> AliveList(this List<MMPlayer> list)
         {
-            return list.Where(ply => ply.Role == MMRole.Spectator);
+            List<MMPlayer> output = new List<MMPlayer>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Role == MMRole.Innocent || list[i].Role == MMRole.Murderer || list[i].Role == MMRole.Detective)
+                {
+                    output.Add(list[i]);
+                }
+            }
+
+            return output;
         }
 
-        public static IEnumerable<MMPlayer> Innocents(this IEnumerable<MMPlayer> list)
+        public static int OfRoleCount(this List<MMPlayer> list, MMRole role)
         {
-            return list.Where(ply => ply.Role == MMRole.Innocent);
+            int output = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Role == role)
+                {
+                    output++;
+                }
+            }
+
+            return output;
         }
 
-        public static IEnumerable<MMPlayer> Murderers(this IEnumerable<MMPlayer> list)
+        public static int AliveListCount(this List<MMPlayer> list)
         {
-            return list.Where(ply => ply.Role == MMRole.Murderer);
-        }
+            int output = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Role == MMRole.Innocent || list[i].Role == MMRole.Murderer || list[i].Role == MMRole.Detective)
+                {
+                    output++;
+                }
+            }
 
-        public static IEnumerable<MMPlayer> Detectives(this IEnumerable<MMPlayer> list)
-        {
-            return list.Where(ply => ply.Role == MMRole.Detective);
-        }
-
-        public static IEnumerable<MMPlayer> AliveList(this IEnumerable<MMPlayer> list)
-        {
-            return list.Where(ply => ply.Role == MMRole.Innocent || ply.Role == MMRole.Murderer || ply.Role == MMRole.Detective);
+            return output;
         }
 
         public static bool IsAlive(this MMPlayer ply)
