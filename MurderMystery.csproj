@@ -98,7 +98,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Enums.cs" />
+    <Compile Include="API\GamemodeManager.cs" />
+    <Compile Include="API\MMPlayer.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="EventHandlers.cs" />
     <Compile Include="MurderMystery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

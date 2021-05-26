@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using MurderMystery.API;
 using System;
 
 namespace MurderMystery
@@ -15,12 +16,15 @@ namespace MurderMystery
 
         public static MurderMystery Singleton { get; private set; }
 
+        public GamemodeManager GamemodeManager { get; private set; }
+
         public bool DebugVersion => true;
         public bool LogDebug => DebugVersion || Config.Debug;
 
         public override void OnEnabled()
         {
             Singleton = this;
+            GamemodeManager = new GamemodeManager();
 
             base.OnEnabled();
         }
@@ -28,6 +32,7 @@ namespace MurderMystery
         public override void OnDisabled()
         {
             Singleton = null;
+            GamemodeManager = null;
 
             base.OnDisabled();
         }
