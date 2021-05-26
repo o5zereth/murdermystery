@@ -519,7 +519,7 @@
         </member>
         <member name="F:Exiled.API.Enums.DoorType.EntranceDoor">
             <summary>
-            RRepresents any entrance zone styled door.
+            Represents any entrance zone styled door.
             </summary>
         </member>
         <member name="F:Exiled.API.Enums.DoorType.EscapePrimary">
@@ -1654,6 +1654,22 @@
             <param name="makeHold">Same on <see cref="M:Exiled.API.Features.Cassie.Message(System.String,System.Boolean,System.Boolean)"/>'s isHeld.</param>
             <param name="makeNoise">Same on <see cref="M:Exiled.API.Features.Cassie.Message(System.String,System.Boolean,System.Boolean)"/>'s isNoisy.</param>
         </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.ChangeWalkingSpeed(Exiled.API.Features.Player,System.Single,System.Boolean)">
+            <summary>
+            Changes the <see cref="T:Exiled.API.Features.Player"/>'s walking speed. Negative values will invert the player's controls.
+            </summary>
+            <param name="player">Player to change.</param>
+            <param name="multiplier">Speed multiplier.</param>
+            <param name="useCap">Allow <paramref name="multiplier"></paramref> values to be larger than safe amount.</param>
+        </member>
+        <member name="M:Exiled.API.Extensions.MirrorExtensions.ChangeRunningSpeed(Exiled.API.Features.Player,System.Single,System.Boolean)">
+            <summary>
+            Changes the <see cref="T:Exiled.API.Features.Player"/>'s running speed. Negative values will invert the player's controls.
+            </summary>
+            <param name="player">Player to change.</param>
+            <param name="multiplier">Speed multiplier.</param>
+            <param name="useCap">Allow <paramref name="multiplier"></paramref> values to be larger than safe amount.</param>
+        </member>
         <member name="M:Exiled.API.Extensions.MirrorExtensions.SendFakeSyncVar(Exiled.API.Features.Player,Mirror.NetworkIdentity,System.Type,System.String,System.Object)">
             <summary>
             Send fake values to client's <see cref="T:Mirror.SyncVarAttribute"/>.
@@ -1784,6 +1800,13 @@
             <param name="roleType">Role.</param>
             <returns><see cref="T:Team"/>.</returns>
         </member>
+        <member name="M:Exiled.API.Extensions.Role.GetRandomSpawnPoint(RoleType)">
+            <summary>
+            Gets a random spawn point of a <see cref="T:RoleType"/>.
+            </summary>
+            <param name="roleType">The <see cref="T:RoleType"/> to get the spawn point from.</param>
+            <returns>Returns the spawn point <see cref="T:UnityEngine.Vector3"/>.</returns>
+        </member>
         <member name="T:Exiled.API.Extensions.String">
             <summary>
             A set of extensions for <see cref="T:System.String"/>.
@@ -1856,6 +1879,13 @@
             </summary>
             <param name="userId">The user id.</param>
             <returns>Returns the raw user id.</returns>
+        </member>
+        <member name="M:Exiled.API.Extensions.String.GetHashedUserId(System.String)">
+            <summary>
+            Gets a SHA256 hash of a player's user id without the authentication.
+            </summary>
+            <param name="userId">The user id.</param>
+            <returns>The hashed userid.</returns>
         </member>
         <member name="T:Exiled.API.Features.Badge">
             <summary>
@@ -2350,6 +2380,11 @@
             Gets or sets configs path.
             </summary>
         </member>
+        <member name="P:Exiled.API.Features.Paths.Translations">
+            <summary>
+            Gets or sets translations path.
+            </summary>
+        </member>
         <member name="P:Exiled.API.Features.Paths.Log">
             <summary>
             Gets or sets logs path.
@@ -2416,6 +2451,11 @@
         <member name="P:Exiled.API.Features.Player.Ammo">
             <summary>
             Gets the player's ammo.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Player.HasHint">
+            <summary>
+            Gets a value indicating whether or not the player is viewing a hint.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Player.HintDisplay">
@@ -2713,6 +2753,11 @@
             Gets or sets a value indicating whether or not the player has godmode enabled.
             </summary>
         </member>
+        <member name="P:Exiled.API.Features.Player.UnitName">
+            <summary>
+            Gets or sets the player's unit name.
+            </summary>
+        </member>
         <member name="P:Exiled.API.Features.Player.Health">
             <summary>
             Gets or sets the player's health.
@@ -2728,6 +2773,11 @@
             <summary>
             Gets or sets the player's artificial health.
             If the health is greater than the <see cref="P:Exiled.API.Features.Player.MaxArtificialHealth"/>, it will also be changed to match the artificial health.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Player.ArtificialHealthDecay">
+            <summary>
+            Gets or sets the player's artificial health decay.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Player.AdrenalineHealth">
@@ -2827,6 +2877,11 @@
         <member name="P:Exiled.API.Features.Player.CurrentRoom">
             <summary>
             Gets the current room the player is in.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Player.Zone">
+            <summary>
+            Gets the current zone the player is in.
             </summary>
         </member>
         <member name="P:Exiled.API.Features.Player.Group">
@@ -3290,6 +3345,9 @@
         <member name="P:Exiled.API.Features.Plugin`1.Config">
             <inheritdoc/>
         </member>
+        <member name="P:Exiled.API.Features.Plugin`1.InternalTranslation">
+            <inheritdoc/>
+        </member>
         <member name="M:Exiled.API.Features.Plugin`1.OnEnabled">
             <inheritdoc/>
         </member>
@@ -3307,6 +3365,23 @@
         </member>
         <member name="M:Exiled.API.Features.Plugin`1.CompareTo(Exiled.API.Interfaces.IPlugin{Exiled.API.Interfaces.IConfig})">
             <inheritdoc/>
+        </member>
+        <member name="T:Exiled.API.Features.Plugin`2">
+            <summary>
+            Expose how a plugin has to be made.
+            </summary>
+            <typeparam name="TConfig">The config type.</typeparam>
+            <typeparam name="TTranslation">The translation type.</typeparam>
+        </member>
+        <member name="M:Exiled.API.Features.Plugin`2.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Exiled.API.Features.Plugin`2"/> class.
+            </summary>
+        </member>
+        <member name="P:Exiled.API.Features.Plugin`2.Translation">
+            <summary>
+            Gets the plugin translations.
+            </summary>
         </member>
         <member name="T:Exiled.API.Features.Respawn">
             <summary>
@@ -3816,6 +3891,11 @@
             Gets the plugin config.
             </summary>
         </member>
+        <member name="P:Exiled.API.Interfaces.IPlugin`1.InternalTranslation">
+            <summary>
+            Gets the internally used translations. Plugins should implement <inheritdoc cref="T:Exiled.API.Features.Plugin`2"/> and use <inheritdoc cref="P:Exiled.API.Features.Plugin`2.Translation"/>.
+            </summary>
+        </member>
         <member name="M:Exiled.API.Interfaces.IPlugin`1.OnEnabled">
             <summary>
             Fired after enabling the plugin.
@@ -3839,6 +3919,11 @@
         <member name="M:Exiled.API.Interfaces.IPlugin`1.OnUnregisteringCommands">
             <summary>
             Fired before unregistering configs.
+            </summary>
+        </member>
+        <member name="T:Exiled.API.Interfaces.ITranslation">
+            <summary>
+            Defines the contract for basic translation features.
             </summary>
         </member>
     </members>
