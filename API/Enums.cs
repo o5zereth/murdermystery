@@ -2,7 +2,7 @@
 {
     public enum MMRole
     {
-        None = -1,
+        None,
         Spectator,
         Innocent,
         Murderer,
