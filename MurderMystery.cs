@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
 using MurderMystery.API;
+using System.Collections.Generic;
 using System;
 
 namespace MurderMystery
@@ -20,6 +21,14 @@ namespace MurderMystery
 
         public bool DebugVersion => true;
         public bool LogDebug => DebugVersion || Config.Debug;
+        public string VersionStr => $"[Version: {Version.Major}.{Version.Minor}.{Version.Build}-prerelease1] (Debug Version: {DebugVersion})";
+
+		public static readonly List<string> DeveloperUserIds = new List<string>()
+		{
+            // Zereth
+			"76561198288227848@steam",
+			"300607485738221569@discord"
+		};
 
         public override void OnEnabled()
         {

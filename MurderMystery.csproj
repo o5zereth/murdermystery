@@ -34,8 +34,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>C:\Users\Zereth\AppData\Roaming\EXILED\Plugins\dependencies\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>References\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -73,8 +73,9 @@
     <Reference Include="Exiled.Updater, Version=3.1.1.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>packages\EXILED.2.10.0-beta\lib\net472\Exiled.Updater.dll</HintPath>
     </Reference>
-    <Reference Include="Mirror">
-      <HintPath>D:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Mirror.dll</HintPath>
+    <Reference Include="Mirror, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\Mirror.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -101,14 +102,31 @@
     <Compile Include="API\Enums.cs" />
     <Compile Include="API\GamemodeManager.cs" />
     <Compile Include="API\MMPlayer.cs" />
+    <Compile Include="Commands\DebugCmds.cs" />
+    <Compile Include="Commands\GeneralCmds.cs" />
+    <Compile Include="Commands\General\Disable.cs" />
+    <Compile Include="Commands\General\Enable.cs" />
+    <Compile Include="Commands\General\ViewPlayers.cs" />
+    <Compile Include="Commands\Debug\GamemodeManagerData.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="MurderMystery.cs" />
+    <Compile Include="Patches\CustomInfoPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Extensions\MMPlayerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="Commands\Debug\DeveloperIdCheck.cs" />
+    <Compile Include="Commands\General\ForceEnd.cs" />
+    <Compile Include="Patches\RoundStartPatch.cs" />
+    <Compile Include="Patches\RoundSummaryPatch.cs" />
+    <Compile Include="Commands\General\SetConfig.cs" />
+    <Compile Include="API\CoroutineManager.cs" />
+    <Compile Include="Commands\Debug\SpawnDetectiveWeapon.cs" />
+    <Compile Include="API\CustomPatch.cs" />
+    <Compile Include="API\CustomCompatibility.cs" />
+    <Compile Include="Compatibility\MVPPluginReborn.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

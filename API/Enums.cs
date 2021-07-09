@@ -1,6 +1,6 @@
 ﻿namespace MurderMystery.API
 {
-    public enum MMRole
+    public enum MMRole : byte
     {
         None,
         Spectator,
