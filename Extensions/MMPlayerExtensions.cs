@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using System;
 using CommandSystem;
-using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using MurderMystery.API;
+using System;
+using System.Collections.Generic;
 
 namespace MurderMystery.Extensions
 {

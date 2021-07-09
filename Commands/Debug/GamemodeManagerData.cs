@@ -1,7 +1,5 @@
 using CommandSystem;
-using Exiled.Permissions.Extensions;
 using MurderMystery.Extensions;
-using System.Text;
 using System;
 
 namespace MurderMystery.Commands.Debug

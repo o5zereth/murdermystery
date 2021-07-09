@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using MurderMystery.API;
-using System;
 using System.Reflection;
 
 namespace MurderMystery.Patches

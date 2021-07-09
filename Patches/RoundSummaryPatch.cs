@@ -6,7 +6,7 @@ using static RoundSummary;
 
 namespace MurderMystery.Patches
 {
-    public class RoundSummaryPatch : CustomPatch
+	public class RoundSummaryPatch : CustomPatch
 	{
 		public static RoundSummaryPatch Singleton { get; } = new RoundSummaryPatch();
 

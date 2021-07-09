@@ -1,5 +1,4 @@
 using System;
-using Handlers = Exiled.Events.Handlers;
 
 namespace MurderMystery.API
 {

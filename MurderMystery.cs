@@ -1,8 +1,8 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
 using MurderMystery.API;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace MurderMystery
 {

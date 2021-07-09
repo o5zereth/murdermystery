@@ -1,11 +1,9 @@
-﻿using Exiled.API.Enums;
-using CustomPlayerEffects;
-using System;
-using System.Text;
-using MEC;
-using MurderMystery.Extensions;
+﻿using CustomPlayerEffects;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using MEC;
+using MurderMystery.Extensions;
 using System.Collections.Generic;
 
 namespace MurderMystery.API
@@ -70,21 +68,18 @@ namespace MurderMystery.API
 
 		internal void SetupPlayer(List<MMPlayer> murderers, List<MMPlayer> detectives)
 		{
-			Timing.CallDelayed(0f, () =>
+			if (IsAlive)
 			{
-				if (IsAlive)
-				{
-					Player.SetRole(RoleType.ClassD, true, false);
-					Player.Inventory.Clear();
-					Player.AddItem(ItemType.Painkillers);
-					Player.Ammo[(int)AmmoType.Nato9] = int.MaxValue;
-				}
-				else
-				{
-					Player.SetRole(RoleType.Spectator, false, false);
-				}
-				BroadcastRoleInfo(murderers, detectives);
-			});
+				Player.SetRole(RoleType.ClassD, true, false);
+				Player.Inventory.Clear();
+				Player.AddItem(ItemType.Painkillers);
+				Player.Ammo[(int)AmmoType.Nato9] = int.MaxValue;
+			}
+			else
+			{
+				Player.SetRole(RoleType.Spectator, false, false);
+			}
+			BroadcastRoleInfo(murderers, detectives);
 		}
 
 		private void BroadcastRoleInfo(List<MMPlayer> murderers, List<MMPlayer> detectives)

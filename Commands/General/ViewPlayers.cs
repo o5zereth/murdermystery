@@ -1,13 +1,13 @@
 using CommandSystem;
 using Exiled.Permissions.Extensions;
-using System.Text;
-using System;
 using MurderMystery.API;
 using MurderMystery.Extensions;
+using System;
+using System.Text;
 
 namespace MurderMystery.Commands.General
 {
-	public class ViewPlayers : ICommand
+    public class ViewPlayers : ICommand
 	{
 		public string Command { get; } = "viewplayers";
 

@@ -1,6 +1,5 @@
-﻿using MEC;
+﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
-using Exiled.API.Features;
 using MurderMystery.API;
 using MurderMystery.Extensions;
 using MurderMystery.Patches;
